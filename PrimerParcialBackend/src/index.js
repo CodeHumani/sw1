@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import app from './config/app.js';
 import pool from './config/db.js';
 import { Server as SocketIOServer } from 'socket.io';
@@ -67,7 +68,6 @@ io.on('connection', (socket) => {
                     // 🚀 ENVIAR TANTO estadoInicial COMO xmlActualizado para máxima compatibilidad
                     socket.emit('estadoInicial', { state: estadoInicial });
                     
-                    // 🆕 TAMBIÉN enviar como xmlActualizado para activar la sincronización automática
                     socket.emit('xmlActualizado', {
                         nuevoEstado: estadoInicial,
                         message: 'Sincronizando con pizarra actual',
@@ -96,6 +96,72 @@ io.on('connection', (socket) => {
             socket.emit('errorSincronizacion', { message: 'Error al unirse a la sala' });
         }
     });
+    
+    socket.on('cambioInstantaneo', (data) => {
+        try {
+            const { salaId, usuario, tipo, elemento, timestamp } = data;
+            if (!salaId || !tipo || !elemento) {
+                console.warn('❌ Datos insuficientes en cambioInstantaneo:', { salaId, tipo, elemento: elemento?.id });
+                socket.emit('errorSincronizacion', { message: 'Datos insuficientes para sincronizar cambio' });
+                return;
+            }
+            if (!usuario || !usuario.name) {
+                console.warn('❌ Usuario inválido en cambioInstantaneo:', usuario);
+                socket.emit('errorSincronizacion', { message: 'Usuario inválido para sincronizar cambio' });
+                return;
+            }
+            const salaIdNormalizado = parseInt(salaId, 10);
+            if (!socket.salaId || parseInt(socket.salaId, 10) !== salaIdNormalizado) {
+                socket.emit('errorSincronizacion', { message: 'No estás conectado a esta sala' });
+                return;
+            }
+            socket.to(`sala_${salaIdNormalizado}`).emit('cambioRecibido', {
+                salaId: salaIdNormalizado,
+                usuario,
+                tipo,
+                elemento,
+                timestamp: timestamp || Date.now()
+            });
+        } catch (error) {
+            console.error('❌ Error en cambio instantáneo:', error);
+            socket.emit('errorSincronizacion', { message: 'Error al sincronizar cambio' });
+        }
+    });
+    
+    socket.on('operacionElemento', (data) => {
+        try {
+            const { salaId, usuario, operacion, elemento } = data;
+            if (!salaId || !operacion || !elemento) {
+                console.warn('❌ Datos insuficientes en operacionElemento:', { salaId, operacion, elemento: elemento?.id });
+                socket.emit('errorSincronizacion', { message: 'Datos insuficientes para operación elemento' });
+                return;
+            }
+            if (!usuario || !usuario.name) {
+                console.warn('❌ Usuario inválido en operacionElemento:', usuario);
+                socket.emit('errorSincronizacion', { message: 'Usuario inválido para operación elemento' });
+                return;
+            }
+            const salaIdNormalizado = parseInt(salaId, 10);
+            if (!socket.salaId || parseInt(socket.salaId, 10) !== salaIdNormalizado) {
+                socket.emit('errorSincronizacion', { message: 'No estás conectado a esta sala' });
+                return;
+            }
+            const sala = salasActivas.get(salaIdNormalizado);
+            if (sala) {
+                sala.ultimaModificacion = Date.now();
+            }
+            socket.to(`sala_${salaIdNormalizado}`).emit('elementoOperado', {
+                salaId: salaIdNormalizado,
+                usuario,
+                operacion,
+                elemento,
+                timestamp: Date.now()
+            });
+        } catch (error) {
+            console.error('❌ Error en operación elemento:', error);
+            socket.emit('errorSincronizacion', { message: 'Error al sincronizar operación' });
+        }
+    });
 
     socket.on('actualizarDiagrama', (data) => {
         try {
@@ -103,7 +169,6 @@ io.on('connection', (socket) => {
             const salaIdNormalizado = parseInt(salaId, 10);
             const socketSalaNormalizada = parseInt(socket.salaId, 10);
             if (!socket.salaId || socketSalaNormalizada !== salaIdNormalizado) {
-                console.log(`❌ Usuario NO conectado a sala ${salaIdNormalizado} (está en ${socketSalaNormalizada})`);
                 socket.emit('errorSincronizacion', { message: 'No estás conectado a esta sala' });
                 return;
             }
@@ -113,14 +178,10 @@ io.on('connection', (socket) => {
                 if (action === 'fullState') {
                     sala.ultimoEstado = data.data.state;
                 }
-                sala.usuarios.forEach((user, socketId) => {
-                    console.log(`      - ${user.name} (${user.isInvited ? 'INVITADO/USERSALA' : 'PROPIETARIO/ANFITRIÓN'})`);
-                });
             }
             const clientesEnSala = io.sockets.adapter.rooms.get(`sala_${salaIdNormalizado}`);
             const numClientesDestino = clientesEnSala ? clientesEnSala.size - 1 : 0;
             socket.to(`sala_${salaIdNormalizado}`).emit('diagramaActualizado', data);
-            
         } catch (error) {
             console.error('❌ Error actualizando diagrama:', error);
             socket.emit('errorSincronizacion', { message: 'Error al sincronizar cambios' });
@@ -146,13 +207,11 @@ io.on('connection', (socket) => {
 
     socket.on('solicitarEstado', async ({ salaId }) => {
         try {
-            console.log(`📥 Solicitando estado inicial para sala ${salaId}`);
             const sala = salasActivas.get(salaId);
             if (sala && sala.ultimoEstado) {
                 socket.emit('estadoInicial', { state: sala.ultimoEstado });
                 return;
             }
-            console.log(`🔍 Socket: Cargando estado para sala ${salaId} desde DB`);
             const salaData = await getSalaById(salaId);
             if (salaData && salaData.length > 0 && salaData[0].xml) {
                 const estadoInicial = JSON.parse(salaData[0].xml);
@@ -160,9 +219,7 @@ io.on('connection', (socket) => {
                 if (sala) {
                     sala.ultimoEstado = estadoInicial;
                 }
-                console.log(`✅ Socket: Estado cargado desde DB para sala ${salaId}`);
             } else {
-                console.log(`⚠️ Socket: No se encontró estado en DB para sala ${salaId}`);
                 socket.emit('estadoInicial', { state: null });
             }
         } catch (error) {
@@ -192,10 +249,6 @@ io.on('connection', (socket) => {
         }
     });
 });
-
-// REMOVIDO: Auto-guardado por intervalo de tiempo
-// Ahora solo se guarda cuando hay eventos reales de usuario (movimientos, cambios)
-console.log('� Auto-guardado por tiempo DESHABILITADO - Solo guardado por eventos de usuario');
 
 app.use((req, res, next) => {
     res.status(404).json({ error: 'Not Found' });

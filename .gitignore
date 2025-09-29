@@ -5,26 +5,20 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# node_modules folder
+# Dependencies
 node_modules/
 jspm_packages/
 
-# Build outputs
-dist/
-build/
-.next/
-.nuxt/
-
-# Environment variables
+# Environment variables - ¡MUY IMPORTANTE!
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Cache directories
-.cache/
-.parcel-cache/
+# Build outputs
+dist/
+build/
 
 # IDE files
 .vscode/
@@ -42,14 +36,15 @@ ehthumbs.db
 Thumbs.db
 
 # Temporary files
+temp/
 *.tmp
 *.temp
 
-# Frontend specific
-*.map
-.sass-cache/
+# Database files
+*.sqlite
+*.sqlite3
+*.db
 
-# Runtime files
-*.pid
-*.seed
-*.pid.lock
+# Project specific
+uploads/
+public/uploads/
