@@ -7,24 +7,59 @@ class AuthController {
 
     register = catchedAsync(async (req, res) => {
         const { name, email, password } = req.body;
-        const user = await createUser(name, email, password);
-        if(user) {
+        
+        try {
+            const user = await createUser(name, email, password);
+            
+            if (!user) {
+                return response(res, 400, { 
+                    error: true, 
+                    message: 'No se pudo crear el usuario. Posiblemente el email ya existe.' 
+                });
+            }
+            
             const userALter = await getUserByEmail(email);
+            
+            if (!userALter) {
+                return response(res, 500, { 
+                    error: true, 
+                    message: 'Error interno: Usuario creado pero no encontrado' 
+                });
+            }
+            
             const token = await createAccesToken({ id: userALter.id });
             res.cookie('token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'Strict'
             });
-            response(res, 200, token );
-        }else {
-            next(error);
+            
+            response(res, 200, { 
+                token, 
+                user: { id: userALter.id, name: userALter.name, email: userALter.email } 
+            });
+            
+        } catch (error) {
+            console.error('Error en registro:', error);
+            return response(res, 500, { 
+                error: true, 
+                message: 'Error interno del servidor durante el registro' 
+            });
         }
     });
     
     login = catchedAsync(async (req, res) => {
         const { email, password } = req.body;
         const user = await verifyUserCredentials(email, password);
+        
+        // Verificar si el usuario existe y las credenciales son válidas
+        if (!user) {
+            return response(res, 401, { 
+                error: true, 
+                message: 'Credenciales inválidas' 
+            });
+        }
+        
         const token = await createAccesToken({ id: user.id });
         res.cookie('token', token, {
             httpOnly: true,

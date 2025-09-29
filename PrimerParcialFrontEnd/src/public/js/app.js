@@ -44,3 +44,57 @@ function correr() {
 window.addEventListener('resize', resizeCanvas);
 
 correr();
+
+// ===== FUNCIONALIDAD DE REGISTRO =====
+document.addEventListener('DOMContentLoaded', function() {
+    const registrationForm = document.getElementById('registration-form');
+    
+    if (registrationForm) {
+        registrationForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Validaciones básicas
+            if (!name || !email || !password) {
+                alert('Por favor, completa todos los campos');
+                return;
+            }
+
+            if (password.length < 6) {
+                alert('La contraseña debe tener al menos 6 caracteres');
+                return;
+            }
+
+            try {
+                console.log('Enviando registro a:', `${API_URL}/apis/register`);
+                console.log('Datos:', { name, email, password: '***' });
+
+                const response = await fetch(`${API_URL}/apis/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, password }),
+                    credentials: 'include'
+                });
+
+                console.log('Respuesta HTTP:', response.status);
+                const responseData = await response.json();
+                console.log('Respuesta del servidor:', responseData);
+
+                if (response.ok) {
+                    alert('Registro exitoso. Redirigiendo al dashboard...');
+                    window.location.href = './dashboard.html'; 
+                } else {
+                    alert(`Error en el registro: ${responseData.message || 'Error desconocido'}`);
+                }
+            } catch (error) {
+                console.error('Error en la solicitud de registro:', error);
+                alert('Error de conexión. Verifica que el servidor esté funcionando.');
+            }
+        });
+    }
+});
