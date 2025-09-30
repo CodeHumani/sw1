@@ -306,6 +306,21 @@
             margin-left: 0.25rem;
         }
 
+        /* 🔗 Estilos para claves foráneas */
+        .attribute-foreign-key {
+            font-weight: 500;
+            color: #2563eb;
+            border-left: 3px solid #3b82f6;
+            padding-left: 0.5rem;
+            background: linear-gradient(90deg, #eff6ff, transparent);
+        }
+
+        .attribute-foreign-key.attribute-primary-key {
+            color: #7c2d12;
+            border-left: 3px solid linear-gradient(135deg, #fbbf24, #3b82f6);
+            background: linear-gradient(90deg, #fef3c7, #eff6ff);
+        }
+
         .uml-package {
             position: absolute;
             min-width: 200px;
@@ -1170,6 +1185,311 @@
         .minimize-btn:hover {
             background: rgba(255, 255, 255, 0.2);
         }
+
+        /* Estilos para clases de asociación */
+        .uml-class[data-stereotype="association_class"] {
+            border: 2px solid #059669 !important;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7) !important;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15) !important;
+        }
+
+        .uml-class[data-stereotype="association_class"] .class-header {
+            background: linear-gradient(135deg, #059669, #10b981) !important;
+            color: white !important;
+        }
+
+        .uml-class[data-stereotype="association_class"] .section-title {
+            background: rgba(5, 150, 105, 0.1) !important;
+            color: #059669 !important;
+            font-weight: 600 !important;
+        }
+
+        .uml-class[data-stereotype="association_class"] .class-section {
+            background: rgba(220, 252, 231, 0.3) !important;
+        }
+
+
+        /* 🔗 Líneas segmentadas para clases de asociación */
+        .connection-line.association-class-link {
+            stroke: #000000;
+            stroke-width: 1.5;
+            stroke-dasharray: 5,3;
+            opacity: 0.8;
+        }
+
+        .connection-line.association-class-link:hover {
+            stroke-width: 2;
+            opacity: 1;
+        }
+
+        /* 🎯 Líneas de conexión muchos a muchos con efectos avanzados */
+        .connection-line.association-many-to-many {
+            stroke: url(#gradientManyToMany) !important;
+            stroke-width: 3.5 !important;
+            stroke-dasharray: 12,6 !important;
+            opacity: 0.95 !important;
+            filter: drop-shadow(0 3px 8px rgba(102, 126, 234, 0.4));
+            animation: dash-animation 2s linear infinite;
+        }
+
+        @keyframes dash-animation {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: 18; }
+        }
+
+        .connection-line.association-many-to-many:hover {
+            stroke-width: 4.5 !important;
+            opacity: 1 !important;
+            filter: 
+                drop-shadow(0 4px 12px rgba(102, 126, 234, 0.6))
+                drop-shadow(0 0 8px rgba(118, 75, 162, 0.4));
+            animation: dash-animation 1s linear infinite, pulse-glow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            0% { 
+                filter: 
+                    drop-shadow(0 4px 12px rgba(102, 126, 234, 0.6))
+                    drop-shadow(0 0 8px rgba(118, 75, 162, 0.4));
+            }
+            100% { 
+                filter: 
+                    drop-shadow(0 6px 20px rgba(102, 126, 234, 0.8))
+                    drop-shadow(0 0 16px rgba(118, 75, 162, 0.6));
+            }
+        }
+
+        /* ✅ Líneas many-to-many SIN flechas */
+        .connection-line.many-to-many-main,
+        .connection-line.many-to-many-vertical {
+            marker-start: none !important;
+            marker-end: none !important;
+            stroke: #000000 !important;
+            stroke-width: 2 !important;
+            fill: none !important;
+        }
+
+        /* ✅ Líneas de ASOCIACIÓN SIN flechas */
+        .connection-line.association {
+            marker-start: none !important;
+            marker-end: none !important;
+            stroke: #2563eb !important;
+            stroke-width: 2 !important;
+            fill: none !important;
+        }
+
+        /* 📊 Grupo de conexiones muchos a muchos */
+        .many-to-many-connection {
+            transition: all 0.2s ease;
+        }
+
+        .many-to-many-connection:hover {
+            transform: scale(1.02);
+        }
+
+        /* 🎨 Tabla intermedia COMPACTA y elegante */
+        .uml-class[data-stereotype="association_table"] {
+            border: 2px solid transparent !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            box-shadow: 
+                0 4px 16px rgba(102, 126, 234, 0.25),
+                0 2px 8px rgba(118, 75, 162, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+            position: relative;
+            border-radius: 8px !important;
+            overflow: hidden;
+            transform: scale(0.9); /* MÁS PEQUEÑA */
+            animation: pulse-association 3s ease-in-out infinite alternate;
+            min-width: 120px !important;
+            max-width: 150px !important;
+            font-size: 0.8em !important;
+        }
+
+        @keyframes pulse-association {
+            0% { 
+                box-shadow: 
+                    0 8px 32px rgba(102, 126, 234, 0.3),
+                    0 4px 16px rgba(118, 75, 162, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            }
+            100% { 
+                box-shadow: 
+                    0 12px 40px rgba(102, 126, 234, 0.4),
+                    0 6px 20px rgba(118, 75, 162, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            }
+        }
+
+        .uml-class[data-stereotype="association_table"]::before {
+            content: "�";
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            border: 3px solid white;
+            box-shadow: 
+                0 4px 12px rgba(238, 90, 36, 0.4),
+                0 0 0 2px rgba(255, 107, 107, 0.2);
+            z-index: 10;
+            animation: rotate-badge 3s linear infinite;
+        }
+
+        @keyframes rotate-badge {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .uml-class[data-stereotype="association_table"]::after {
+            content: "MUCHOS A MUCHOS";
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 10px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(245, 87, 108, 0.3);
+            z-index: 5;
+        }
+
+        .uml-class[data-stereotype="association_table"] .class-header {
+            background: rgba(255, 255, 255, 0.2) !important;
+            backdrop-filter: blur(8px) !important;
+            color: white !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.25) !important;
+            border-radius: 8px 8px 0 0 !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+            position: relative;
+            overflow: hidden;
+            padding: 4px 8px !important; /* PADDING REDUCIDO */
+            font-size: 0.85em !important;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .uml-class[data-stereotype="association_table"] .class-header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .uml-class[data-stereotype="association_table"] .class-section {
+            background: rgba(255, 255, 255, 0.12) !important;
+            backdrop-filter: blur(4px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+            margin: 1px !important;
+            border-radius: 6px !important;
+            padding: 4px 6px !important; /* PADDING COMPACTO */
+        }
+
+        .uml-class[data-stereotype="association_table"] .section-title {
+            color: white !important;
+            font-weight: 600 !important;
+            font-size: 0.8em !important;
+            padding: 2px 4px !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+            background: rgba(255, 255, 255, 0.1) !important;
+            padding: 6px 12px !important;
+            border-radius: 6px !important;
+            margin: -2px !important;
+            font-size: 0.85rem !important;
+        }
+
+        /* 🔑 Claves foráneas COMPACTAS */
+        .uml-class[data-stereotype="association_table"] .attribute.attribute-primary-key {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%) !important;
+            color: white !important;
+            font-size: 0.75em !important;
+            padding: 2px 6px !important;
+            border: none !important;
+            padding: 8px 12px !important;
+            border-radius: 8px !important;
+            margin: 4px 2px !important;
+            font-weight: 600 !important;
+            box-shadow: 
+                0 4px 15px rgba(255, 216, 155, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .uml-class[data-stereotype="association_table"] .attribute.attribute-primary-key::before {
+            content: "🗝️";
+            margin-right: 6px;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+        }
+
+        .uml-class[data-stereotype="association_table"] .attribute.attribute-foreign-key {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            border: none !important;
+            padding: 2px 6px !important;
+            font-size: 0.75em !important;
+            border-radius: 6px !important;
+            margin: 3px 2px !important;
+            font-weight: 500 !important;
+            box-shadow: 
+                0 3px 10px rgba(102, 126, 234, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+        }
+
+        /* 💫 Animación para nuevas relaciones M:N */
+        @keyframes many-to-many-creation {
+            0% { 
+                opacity: 0; 
+                transform: scale(0.8) rotate(-5deg); 
+            }
+            50% { 
+                opacity: 0.7; 
+                transform: scale(1.1) rotate(2deg); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: scale(1) rotate(0deg); 
+            }
+        }
+
+        .uml-class[data-stereotype="association_table"].newly-created {
+            animation: many-to-many-creation 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* 🎨 Indicador visual para el tipo de relación */
+        .connection-group[data-many-to-many-group]::after {
+            content: "M:N";
+            position: absolute;
+            background: #2563eb;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 10px;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -1185,25 +1505,16 @@
                     <i class="fas fa-square"></i>
                     <span>Clase</span>
                 </div>
-                <div class="tool-item" draggable="true" data-tool="interface">
-                    <i class="far fa-square"></i>
-                    <span>Interfaz</span>
+            </div>
+            <div class="tool-section">
+                <h6 class="text-muted mb-3">Relaciones UML</h6>
+                <div class="tool-item" onclick="ConnectionManager.showManyToManyDialog()" style="cursor: pointer;">
+                    <i class="fas fa-exchange-alt" style="color: #2563eb;"></i>
+                    <span>Muchos a Muchos</span>
                 </div>
-                <div class="tool-item" draggable="true" data-tool="abstract">
-                    <i class="fas fa-square-full"></i>
-                    <span>Clase Abstracta</span>
-                </div>
-                <div class="tool-item" draggable="true" data-tool="enum">
-                    <i class="fas fa-list-ol"></i>
-                    <span>Enumeración</span>
-                </div>
-                <div class="tool-item" draggable="true" data-tool="package">
-                    <i class="fas fa-folder"></i>
-                    <span>Paquete</span>
-                </div>
-                <div class="tool-item" draggable="true" data-tool="note">
-                    <i class="fas fa-sticky-note"></i>
-                    <span>Nota</span>
+                <div class="tool-item" onclick="ConnectionManager.showQuickConnectionDialog()" style="cursor: pointer;">
+                    <i class="fas fa-link"></i>
+                    <span>Otras Relaciones</span>
                 </div>
             </div>
             <div class="tool-section">
@@ -1250,12 +1561,6 @@
                     </button>
                     <button class="btn btn-sm btn-outline-info" onclick="SalaManager.showXmlViewer()">
                         <i class="fas fa-code"></i> Ver XML/JSON
-                    </button>
-                    <button class="btn btn-sm btn-outline-warning" onclick="debugPizarra()" title="Debug de colaboración">
-                        <i class="fas fa-bug"></i> Debug
-                    </button>
-                    <button class="btn btn-sm btn-outline-success" onclick="probarSincronizacion()" title="Probar sincronización en tiempo real">
-                        <i class="fas fa-sync"></i> Test Sync
                     </button>
                 </div>
             </div>
@@ -1555,12 +1860,25 @@
             }
 
             toHTML() {
+                // Filtrar atributos ocultos para clases de asociación
+                const visibleAttributes = (this.stereotype === 'association_table' || this.stereotype === 'association_class')
+                    ? this.attributes.filter(attr => !attr.isHidden)
+                    : this.attributes;
+                
+                // 🎯 Determinar el ícono y texto para el estereotipo
+                const stereotypeInfo = this.getStereotypeInfo();
+                
                 return `
-                    <div class="uml-class" id="${this.id}" style="left: ${this.x}px; top: ${this.y}px;">
+                    <div class="uml-class ${this.stereotype === 'association_table' ? 'newly-created' : ''}" 
+                         id="${this.id}" 
+                         style="left: ${this.x}px; top: ${this.y}px;" 
+                         data-stereotype="${this.stereotype || ''}">
                         <div class="class-header">
                             <div>
-                                ${this.stereotype ? `<<${this.stereotype}>>` : ''}
-                                <div style="font-size: 1.1em;">${this.name}</div>
+                                ${this.stereotype ? `<<${stereotypeInfo.displayName}>>` : ''}
+                                <div style="font-size: 1.1em;">
+                                    ${stereotypeInfo.icon} ${this.name}
+                                </div>
                             </div>
                             <div class="class-actions">
                                 <button onclick="DiagramManager.editClass('${this.id}')" title="Editar">
@@ -1573,14 +1891,17 @@
                         </div>
                         <div class="class-section">
                             <div class="section-title">
-                                Atributos
+                                ${this.stereotype === 'association_table' ? 'Claves Foráneas (Relación M:N)' : 'Atributos'}
+                                ${(this.stereotype !== 'association_table' && this.stereotype !== 'association_class') ? `
                                 <button class="add-btn" onclick="AttributeManager.showAddDialog('${this.id}')">
                                     <i class="fas fa-plus"></i>
                                 </button>
+                                ` : ''}
                             </div>
-                            ${this.attributes.map((attr, index) => `
-                                <div class="attribute ${attr.isPrimaryKey ? 'attribute-primary-key' : ''}">
+                            ${visibleAttributes.map((attr, index) => `
+                                <div class="attribute ${attr.isPrimaryKey ? 'attribute-primary-key' : ''} ${attr.isForeignKey ? 'attribute-foreign-key' : ''}">
                                     <span>${this.formatAttribute(attr)}</span>
+                                    ${this.stereotype !== 'association_table' ? `
                                     <div class="item-actions">
                                         <button data-action="edit-attribute" data-class-id="${this.id}" data-index="${index}" title="Editar" type="button">
                                             <i class="fas fa-edit"></i>
@@ -1589,19 +1910,29 @@
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
+                                    ` : ''}
                                 </div>
                             `).join('')}
+                            ${this.stereotype === 'association_table' && visibleAttributes.length === 0 ? `
+                                <div class="text-muted small p-2">
+                                    <i class="fas fa-info-circle"></i>
+                                    Las claves foráneas se generan automáticamente
+                                </div>
+                            ` : ''}
                         </div>
                         <div class="class-section">
                             <div class="section-title">
                                 Métodos
+                                ${this.stereotype !== 'association_table' ? `
                                 <button class="add-btn" onclick="MethodManager.showAddDialog('${this.id}')">
                                     <i class="fas fa-plus"></i>
                                 </button>
+                                ` : ''}
                             </div>
                             ${this.methods.map((method, index) => `
                                 <div class="method">
                                     <span>${this.formatMethod(method)}</span>
+                                    ${this.stereotype !== 'association_table' ? `
                                     <div class="item-actions">
                                         <button data-action="edit-method" data-class-id="${this.id}" data-index="${index}" title="Editar" type="button">
                                             <i class="fas fa-edit"></i>
@@ -1610,11 +1941,52 @@
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
+                                    ` : ''}
                                 </div>
                             `).join('')}
+                            ${this.stereotype === 'association_table' && this.methods.length === 0 ? `
+                                <div class="text-muted small p-2">
+                                    <i class="fas fa-cog"></i>
+                                    Métodos de gestión de la relación M:N
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
                 `;
+            }
+
+            getStereotypeInfo() {
+                const stereotypeMap = {
+                    'association_table': {
+                        displayName: 'Tabla Intermedia',
+                        icon: '🔗'
+                    },
+                    'association_class': {
+                        displayName: 'Clase de Asociación',
+                        icon: '🔗'
+                    },
+                    'interface': {
+                        displayName: 'Interface',
+                        icon: '🔲'
+                    },
+                    'abstract': {
+                        displayName: 'Abstracta',
+                        icon: '🔹'
+                    },
+                    'entity': {
+                        displayName: 'Entidad',
+                        icon: '📋'
+                    },
+                    'controller': {
+                        displayName: 'Controlador',
+                        icon: '⚙️'
+                    }
+                };
+                
+                return stereotypeMap[this.stereotype] || {
+                    displayName: this.stereotype || '',
+                    icon: ''
+                };
             }
 
             formatAttribute(attr) {
@@ -1624,9 +1996,11 @@
                     'public': '+',
                     'package': '~'
                 }[attr.visibility] || '+';
-                const primaryKeySymbol = attr.isPrimaryKey ? ' <span class="primary-key-icon">🔑</span>' : '';
-                const staticModifier = attr.isStatic ? ' {static}' : '';
-                return `${visibilitySymbol} ${attr.name}: ${attr.type}${staticModifier}${primaryKeySymbol}`;
+                
+                // Formato COMPACTO para tablas intermedias
+                const keyIcon = attr.isForeignKey ? ' 🔗' : '';
+                
+                return `${visibilitySymbol} ${attr.name}: ${attr.type}${keyIcon}`;
             }
 
             formatMethod(method) {
@@ -1636,11 +2010,15 @@
                     'public': '+',
                     'package': '~'
                 }[method.visibility] || '+';
+                
                 const params = method.parameters && method.parameters.length > 0
                     ? method.parameters.map(p => `${p.name}: ${p.type}`).join(', ')
                     : '';
                 const returnType = method.returnType ? `: ${method.returnType}` : '';
-                return `${visibilitySymbol} ${method.name}(${params})${returnType}`;
+                const staticModifier = method.isStatic ? ' {static}' : '';
+                const annotation = method.annotation ? `<br><small class="text-info">${method.annotation}</small>` : '';
+                
+                return `${annotation}${visibilitySymbol} <strong>${method.name}</strong>(${params})${returnType}${staticModifier}`;
             }
 
             updateDisplay() {
@@ -2748,38 +3126,436 @@
                 const elementMap = new Map();
                 elements.forEach(el => elementMap.set(el.id, el));
                 
+                // 🔍 Primero procesar tablas intermedias (association_table)
+                const associationTables = elements.filter(el => 
+                    el.stereotype === 'association_table' || 
+                    (el.name && el.name.toLowerCase().includes('claves'))
+                );
+                
+                console.log(`🔍 Tablas intermedias encontradas: ${associationTables.length}`);
+                
+                // 🚀 Procesar conexiones many-to-many-direct
+                const manyToManyConnections = connections.filter(conn => 
+                    conn.relationshipType === 'many-to-many-direct'
+                );                
+                manyToManyConnections.forEach(connection => {
+                    try {
+                        this.processManyToManyRelationship(elements, elementMap, connection);
+                    } catch (error) {
+                        console.error(`❌ Error procesando M:N:`, error);
+                    }
+                });
+                
+                // Luego procesar conexiones normales
                 connections.forEach(connection => {
                     try {
+                        if (connection.relationshipType === 'many-to-many-direct') return;
                         if (!connection.fromElement || !connection.toElement) return;
-                        
                         const fromEl = elementMap.get(connection.fromElement);
                         const toEl = elementMap.get(connection.toElement);
-                        
-                        if (!fromEl || !toEl || fromEl.type !== 'class' || toEl.type !== 'class') return;
-                        
-                        console.log(`🔗 Analizando relación: ${fromEl.name} -> ${toEl.name}`);
-                        console.log(`   Tipo: ${connection.relationshipType}, Multiplicidad: ${connection.multiplicity}`);
-                        
-                        // Obtener llave primaria de la entidad referenciada
+                        if (!fromEl || !toEl || fromEl.type !== 'class' || toEl.type !== 'class') return;                        
                         const referencedPK = this.getPrimaryKeyInfo(toEl);
-                        
-                        // Procesar según el tipo de relación y multiplicidad
                         this.addForeignKeyBasedOnRelationship(fromEl, toEl, connection, referencedPK);
-                        
                     } catch (error) {
                         console.error(`❌ Error procesando conexión:`, error);
                     }
                 });
             }
 
+            static processManyToManyRelationship(elements, elementMap, connection) {
+                const fromEl = elementMap.get(connection.fromElement);
+                const toEl = elementMap.get(connection.toElement);
+                
+                if (!fromEl || !toEl) {
+                    console.error(`❌ No se encontraron las entidades para M:N: ${connection.fromElement} -> ${connection.toElement}`);
+                    return;
+                }
+                
+                console.log(`🔗 Procesando M:N entre: ${fromEl.name} ↔ ${toEl.name}`);
+                
+                // 🔍 Buscar la tabla intermedia asociada
+                let associationTable = null;
+                if (connection.associationTable) {
+                    associationTable = elementMap.get(connection.associationTable);
+                }
+                
+                // Si no se encuentra, buscar por patrón de nombre
+                if (!associationTable) {
+                    const searchPatterns = [
+                        `${fromEl.name}${toEl.name}`,
+                        `${toEl.name}${fromEl.name}`,
+                        `${fromEl.name}_${toEl.name}`,
+                        `${toEl.name}_${fromEl.name}`
+                    ];
+                    
+                    for (const pattern of searchPatterns) {
+                        associationTable = elements.find(el => 
+                            el.name && el.name.toLowerCase().includes(pattern.toLowerCase())
+                        );
+                        if (associationTable) break;
+                    }
+                }
+                
+                if (!associationTable) {
+                    console.log(`⚠️ No se encontró tabla intermedia, creando una nueva...`);
+                    associationTable = this.createAssociationTable(fromEl, toEl, elements);
+                }
+                
+                // 🔧 Configurar la tabla intermedia correctamente para JPA
+                this.configureAssociationTableForJPA(associationTable, fromEl, toEl);
+                
+                // 🔧 Agregar anotaciones @ManyToMany a las entidades principales
+                this.addManyToManyAnnotations(fromEl, toEl, associationTable);
+                
+                console.log(`✅ Relación M:N configurada: ${fromEl.name} ↔ ${associationTable.name} ↔ ${toEl.name}`);
+            }
+            
+            static createAssociationTable(fromEl, toEl, elements) {
+                const tableName = `${fromEl.name}${toEl.name}`;
+                
+                const associationTable = {
+                    id: `assoc_${Date.now()}`,
+                    name: tableName,
+                    type: 'class',
+                    stereotype: 'association_table',
+                    attributes: [],
+                    methods: [],
+                    x: 0,
+                    y: 0,
+                    isGeneratedAssociation: true
+                };
+                
+                elements.push(associationTable);
+                console.log(`✅ Tabla intermedia creada: ${tableName}`);
+                return associationTable;
+            }
+            
+            static configureAssociationTableForJPA(associationTable, entity1, entity2) {
+                console.log(`🔧 Configurando tabla intermedia para JPA: ${associationTable.name}`);
+                console.log('📊 Entidades source:', { 
+                    entity1: { name: entity1.name, attributes: entity1.attributes },
+                    entity2: { name: entity2.name, attributes: entity2.attributes }
+                });
+                if (associationTable.isGeneratedAssociation) {
+                    associationTable.attributes = [];
+                }
+                const pk1 = this.getPrimaryKeyInfoWithValidation(entity1);
+                const pk2 = this.getPrimaryKeyInfoWithValidation(entity2);
+                
+                console.log('🎯 PKs detectadas:', {
+                    pk1: { name: pk1.name, type: pk1.type, sqlType: pk1.sqlType, entity: entity1.name },
+                    pk2: { name: pk2.name, type: pk2.type, sqlType: pk2.sqlType, entity: entity2.name }
+                });
+                
+                // 🧪 VALIDACIÓN CRÍTICA: Verificar que los tipos no sean 'Long' por defecto
+                if (pk1.type === 'Long' && pk1.name === 'id') {
+                    console.warn(`⚠️ ADVERTENCIA: ${entity1.name} usa PK por defecto (Long id). Verificar atributos.`);
+                }
+                if (pk2.type === 'Long' && pk2.name === 'id') {
+                    console.warn(`⚠️ ADVERTENCIA: ${entity2.name} usa PK por defecto (Long id). Verificar atributos.`);
+                }
+                
+                // 🎯 Crear nombres de FK que coincidan EXACTAMENTE con las PKs referenciadas
+                const fk1Name = `${entity1.name.toLowerCase()}${pk1.name.charAt(0).toUpperCase() + pk1.name.slice(1)}`;
+                const fk2Name = `${entity2.name.toLowerCase()}${pk2.name.charAt(0).toUpperCase() + pk2.name.slice(1)}`;
+                
+                console.log(`🔍 PK1: ${entity1.name}.${pk1.name} (${pk1.type}) -> SQL: ${pk1.sqlType}`);
+                console.log(`🔍 PK2: ${entity2.name}.${pk2.name} (${pk2.type}) -> SQL: ${pk2.sqlType}`);
+                
+                // 🔑 Crear atributos que son SIMULTÁNEAMENTE PK Y FK
+                const fk1 = {
+                    name: fk1Name,
+                    type: pk1.type,                    // ✅ MISMO tipo que la PK referenciada
+                    sqlType: pk1.sqlType || 'BIGINT', // ✅ Tipo SQL para la base de datos
+                    visibility: 'private',
+                    isPrimaryKey: true,              // 🔑 ES parte de la PK compuesta
+                    isForeignKey: true,              // 🔗 ES FK que apunta a entity1
+                    isCompositeKey: true,            // Parte de clave compuesta
+                    referencedEntity: entity1.name,  // ✅ Apunta a entity1
+                    referencedField: pk1.name,       // ✅ Apunta al campo PK de entity1
+                    referencedType: pk1.type,        // ✅ Tipo de la PK referenciada
+                    referencedSqlType: pk1.sqlType || 'BIGINT', // ✅ Tipo SQL de la PK referenciada
+                    relationship: 'ManyToOne',
+                    nullable: false,                 // NO puede ser null
+                    constraintType: 'PRIMARY_KEY_AND_FOREIGN_KEY', // ✅ AMBOS constraints
+                    jpaAnnotations: [
+                        '@Id',                       // ✅ Marca como PK
+                        '@Column(name = "' + fk1Name + '", nullable = false)', // ✅ Configuración de columna
+                        // La FK se manejará a nivel de tabla, no de campo para PKs compuestas
+                    ],
+                    sqlConstraints: [
+                        `PRIMARY KEY (${fk1Name}, ${fk2Name})`, // ✅ PK compuesta
+                        `FOREIGN KEY (${fk1Name}) REFERENCES ${entity1.name.toLowerCase()}(${pk1.name})` // ✅ FK
+                    ]
+                };
+                
+                const fk2 = {
+                    name: fk2Name,
+                    type: pk2.type,                    // ✅ MISMO tipo que la PK referenciada
+                    sqlType: pk2.sqlType || 'BIGINT', // ✅ Tipo SQL para la base de datos
+                    visibility: 'private',
+                    isPrimaryKey: true,              // 🔑 ES parte de la PK compuesta
+                    isForeignKey: true,              // 🔗 ES FK que apunta a entity2
+                    isCompositeKey: true,            // Parte de clave compuesta
+                    referencedEntity: entity2.name,  // ✅ Apunta a entity2
+                    referencedField: pk2.name,       // ✅ Apunta al campo PK de entity2
+                    referencedType: pk2.type,        // ✅ Tipo de la PK referenciada
+                    referencedSqlType: pk2.sqlType || 'BIGINT', // ✅ Tipo SQL de la PK referenciada
+                    relationship: 'ManyToOne',
+                    nullable: false,                 // NO puede ser null
+                    constraintType: 'PRIMARY_KEY_AND_FOREIGN_KEY', // ✅ AMBOS constraints
+                    jpaAnnotations: [
+                        '@Id',                       // ✅ Marca como PK
+                        '@Column(name = "' + fk2Name + '", nullable = false)', // ✅ Configuración de columna
+                    ],
+                    sqlConstraints: [
+                        `FOREIGN KEY (${fk2Name}) REFERENCES ${entity2.name.toLowerCase()}(${pk2.name})` // ✅ FK
+                    ]
+                };
+                
+                associationTable.attributes = [fk1, fk2];
+                
+                // 🏗️ Configurar METADATA completa para el backend
+                associationTable.tableMetadata = {
+                    tableName: associationTable.name.toLowerCase(),
+                    primaryKeys: [fk1Name, fk2Name], // ✅ PK compuesta
+                    foreignKeys: [
+                        {
+                            column: fk1Name,
+                            referencedTable: entity1.name.toLowerCase(),
+                            referencedColumn: pk1.name,
+                            type: pk1.type,
+                            sqlType: pk1.sqlType || 'BIGINT'
+                        },
+                        {
+                            column: fk2Name,
+                            referencedTable: entity2.name.toLowerCase(), 
+                            referencedColumn: pk2.name,
+                            type: pk2.type,
+                            sqlType: pk2.sqlType || 'BIGINT'
+                        }
+                    ],
+                    constraints: [
+                        `CONSTRAINT pk_${associationTable.name.toLowerCase()} PRIMARY KEY (${fk1Name}, ${fk2Name})`,
+                        `CONSTRAINT fk_${associationTable.name.toLowerCase()}_${entity1.name.toLowerCase()} FOREIGN KEY (${fk1Name}) REFERENCES ${entity1.name.toLowerCase()}(${pk1.name})`,
+                        `CONSTRAINT fk_${associationTable.name.toLowerCase()}_${entity2.name.toLowerCase()} FOREIGN KEY (${fk2Name}) REFERENCES ${entity2.name.toLowerCase()}(${pk2.name})`
+                    ]
+                };
+                
+                // Configurar anotaciones JPA para la entidad intermedia
+                associationTable.jpaAnnotations = [
+                    '@Entity',
+                    `@Table(name = "${associationTable.name.toLowerCase()}")`,
+                    // Para PKs compuestas, usar @EmbeddedId es más estándar que @IdClass
+                    '@EmbeddedId'
+                ];
+                
+                // Marcar para generar clase Id compuesta embebida
+                associationTable.needsEmbeddedId = true;
+                associationTable.embeddedIdClass = associationTable.name + 'Id';
+                
+                // ✅ Información adicional para que el backend genere SQL correcto
+                associationTable.isAssociationTable = true;
+                associationTable.associatedEntities = [entity1.name, entity2.name];
+                
+                console.log(`✅ Tabla intermedia configurada con PKs compuestas: ${fk1Name}, ${fk2Name}`);
+            }
+            
+            static addManyToManyAnnotations(entity1, entity2, associationTable) {
+                // Agregar colección en entity1 -> entity2
+                if (!entity1.attributes) entity1.attributes = [];
+                
+                const collection1 = {
+                    name: `${entity2.name.toLowerCase()}s`,
+                    type: `Set<${entity2.name}>`,
+                    visibility: 'private',
+                    isManyToManyCollection: true,
+                    targetEntity: entity2.name,
+                    joinTable: associationTable.name,
+                    jpaAnnotations: [
+                        '@ManyToMany',
+                        `@JoinTable(name = "${associationTable.name.toLowerCase()}",`,
+                        `    joinColumns = @JoinColumn(name = "${entity1.name.toLowerCase()}Id"),`,
+                        `    inverseJoinColumns = @JoinColumn(name = "${entity2.name.toLowerCase()}Id"))`
+                    ]
+                };
+                
+                // Agregar colección en entity2 -> entity1 (lado inverso)
+                if (!entity2.attributes) entity2.attributes = [];
+                
+                const collection2 = {
+                    name: `${entity1.name.toLowerCase()}s`,
+                    type: `Set<${entity1.name}>`,
+                    visibility: 'private',
+                    isManyToManyCollection: true,
+                    targetEntity: entity1.name,
+                    mappedBy: collection1.name,
+                    jpaAnnotations: [
+                        `@ManyToMany(mappedBy = "${collection1.name}")`
+                    ]
+                };
+                
+                // Solo agregar si no existen ya
+                const exists1 = entity1.attributes.some(attr => 
+                    attr.name === collection1.name && attr.isManyToManyCollection
+                );
+                const exists2 = entity2.attributes.some(attr => 
+                    attr.name === collection2.name && attr.isManyToManyCollection
+                );
+                
+                if (!exists1) {
+                    entity1.attributes.push(collection1);
+                    console.log(`✅ Colección M:N agregada a ${entity1.name}: ${collection1.name}`);
+                }
+                
+                if (!exists2) {
+                    entity2.attributes.push(collection2);
+                    console.log(`✅ Colección M:N agregada a ${entity2.name}: ${collection2.name}`);
+                }
+            }
+
             static getPrimaryKeyInfo(element) {
-                if (!element.attributes) return { type: 'Long', name: 'id' };
+                if (!element.attributes) return { type: 'Long', name: 'id', sqlType: 'BIGINT' };
                 
                 const pkAttr = element.attributes.find(attr => 
                     typeof attr === 'object' && attr.isPrimaryKey === true
                 );
                 
-                return pkAttr ? { type: pkAttr.type, name: pkAttr.name } : { type: 'Long', name: 'id' };
+                if (pkAttr) {
+                    // Map Java types to SQL types for better database compatibility
+                    const sqlTypeMapping = {
+                        'Long': 'BIGINT',
+                        'Integer': 'INTEGER',
+                        'String': 'VARCHAR(255)',
+                        'UUID': 'UUID',
+                        'int': 'INTEGER',
+                        'long': 'BIGINT'
+                    };
+                    return { 
+                        type: pkAttr.type, 
+                        name: pkAttr.name,
+                        sqlType: sqlTypeMapping[pkAttr.type] || 'BIGINT'
+                    };
+                }
+                
+                return { type: 'Long', name: 'id', sqlType: 'BIGINT' };
+            }
+            
+            static getPrimaryKeyInfoWithValidation(element) {
+                console.log(`🔍 === ANÁLISIS DE PK PARA ${element.name} ===`);
+                console.log('📋 Element completo:', element);
+                
+                if (!element.attributes || !Array.isArray(element.attributes)) {
+                    console.warn(`⚠️ ${element.name} no tiene atributos válidos, usando PK por defecto`);
+                    return { type: 'Long', name: 'id', sqlType: 'BIGINT' };
+                }
+                
+                console.log(`📋 Atributos (${element.attributes.length}):`, element.attributes);
+                
+                // 🔍 Paso 1: Buscar atributo marcado explícitamente como PK
+                let pkAttr = element.attributes.find(attr => 
+                    typeof attr === 'object' && attr !== null && attr.isPrimaryKey === true
+                );
+                console.log('🔍 Paso 1 - PK explícita:', pkAttr);
+                
+                // 🔍 Paso 2: Buscar por convención de nombres (id, codigo)
+                if (!pkAttr) {
+                    pkAttr = element.attributes.find(attr => 
+                        typeof attr === 'object' && attr !== null &&
+                        attr.name && (attr.name === 'id' || attr.name === 'codigo')
+                    );
+                    if (pkAttr) {
+                        console.log(`🔍 Paso 2 - PK por convención: ${pkAttr.name}`);
+                        pkAttr.isPrimaryKey = true;
+                    }
+                }
+                
+                // 🔍 Paso 3: Usar el primer atributo disponible
+                if (!pkAttr && element.attributes.length > 0) {
+                    pkAttr = element.attributes.find(attr => 
+                        typeof attr === 'object' && attr !== null && 
+                        attr.name && attr.type
+                    );
+                    if (pkAttr) {
+                        console.log(`🔍 Paso 3 - Usando primer atributo: ${pkAttr.name}`);
+                        pkAttr.isPrimaryKey = true;
+                    }
+                }
+                
+                if (pkAttr) {
+                    console.log(`🔧 Atributo PK seleccionado:`, pkAttr);
+                    let rawType = pkAttr.type || 'Long';
+                    let normalizedType = this.normalizeJavaType(rawType);
+                    console.log(`🔧 Tipo: "${rawType}" → "${normalizedType}"`);
+                    
+                    const sqlTypeMapping = {
+                        'Long': 'BIGINT',
+                        'Integer': 'INTEGER', 
+                        'String': 'VARCHAR(255)',
+                        'UUID': 'UUID',
+                        'int': 'INTEGER',
+                        'long': 'BIGINT',
+                        'Double': 'DECIMAL',
+                        'Float': 'FLOAT'
+                    };
+                    
+                    const result = { 
+                        type: normalizedType, 
+                        name: pkAttr.name,
+                        sqlType: sqlTypeMapping[normalizedType] || 'BIGINT'
+                    };
+                    
+                    console.log(`✅ PK detectada para ${element.name}:`, result);
+                    return result;
+                }
+                
+                console.warn(`⚠️ No se encontró PK para ${element.name}, usando por defecto`);
+                return { type: 'Long', name: 'id', sqlType: 'BIGINT' };
+            }
+            
+            // 🧪 FUNCIÓN DE DEBUG: Verificar estado de entidades (usar en consola del navegador)
+            static debugEntities() {
+                console.log('🧪 === DEBUG DE ENTIDADES ===');
+                const allElements = DiagramManager.elements;
+                Object.values(allElements).forEach(element => {
+                    if (element.type === 'class') {
+                        console.log(`\n📋 Entidad: ${element.name}`);
+                        console.log('   Atributos:', element.attributes);
+                        if (element.attributes && element.attributes.length > 0) {
+                            element.attributes.forEach((attr, i) => {
+                                const pkStatus = attr.isPrimaryKey ? '🔑 PK' : '';
+                                const fkStatus = attr.isForeignKey ? '🔗 FK' : '';
+                                console.log(`   ${i + 1}. ${attr.name}: ${attr.type} ${pkStatus} ${fkStatus}`);
+                            });
+                        } else {
+                            console.log('   ⚠️ Sin atributos');
+                        }
+                        
+                        // Probar detección de PK
+                        const pkInfo = this.getPrimaryKeyInfoWithValidation(element);
+                        console.log(`   🎯 PK detectada: ${pkInfo.name} (${pkInfo.type})`);
+                    }
+                });
+                console.log('\n💡 Usa ConnectionManager.debugEntities() para ejecutar esta función');
+            }
+            
+            // 🔧 Normalizar tipos Java
+            static normalizeJavaType(type) {
+                const typeMap = {
+                    'string': 'String',
+                    'String': 'String',
+                    'int': 'Integer',
+                    'Integer': 'Integer',
+                    'long': 'Long',
+                    'Long': 'Long',
+                    'double': 'Double',
+                    'Double': 'Double',
+                    'float': 'Float',
+                    'Float': 'Float',
+                    'boolean': 'Boolean',
+                    'Boolean': 'Boolean'
+                };
+                return typeMap[type] || type || 'String';
             }
 
             static addForeignKeyBasedOnRelationship(fromEl, toEl, connection, referencedPK) {
@@ -2853,7 +3629,9 @@
             }
 
             static isManyToMany(multiplicity) {
-                return multiplicity === '*..*' || multiplicity === 'n..n' || multiplicity === '*,*' || multiplicity === 'n,n' || multiplicity === 'm,n';
+                return multiplicity === '*..*' || multiplicity === 'n..n' || multiplicity === '*,*' || 
+                       multiplicity === 'n,n' || multiplicity === 'm,n' || multiplicity === '*:*' ||
+                       multiplicity === 'many:many' || multiplicity === 'M:N';
             }
 
             static isOneToOne(multiplicity) {
@@ -4864,13 +5642,88 @@
             }
 
             static getPrimaryKeyInfo(element) {
-                if (!element.attributes) return { type: 'Long', name: 'id' };
+                if (!element.attributes) return { type: 'Long', name: 'id', sqlType: 'BIGINT' };
                 
                 const pkAttr = element.attributes.find(attr => 
                     typeof attr === 'object' && attr.isPrimaryKey === true
                 );
                 
-                return pkAttr ? { type: pkAttr.type, name: pkAttr.name } : { type: 'Long', name: 'id' };
+                if (pkAttr) {
+                    // Map Java types to SQL types for better database compatibility
+                    const sqlTypeMapping = {
+                        'Long': 'BIGINT',
+                        'Integer': 'INTEGER',
+                        'String': 'VARCHAR(255)',
+                        'UUID': 'UUID',
+                        'int': 'INTEGER',
+                        'long': 'BIGINT'
+                    };
+                    return { 
+                        type: pkAttr.type, 
+                        name: pkAttr.name,
+                        sqlType: sqlTypeMapping[pkAttr.type] || 'BIGINT'
+                    };
+                }
+                
+                return { type: 'Long', name: 'id', sqlType: 'BIGINT' };
+            }
+            
+            // 🔍 Método mejorado para detectar PK con validación exhaustiva (duplicado para compatibilidad)
+            static getPrimaryKeyInfoWithValidation(element) {
+                console.log(`🔍 === ANÁLISIS DE PK PARA ${element.name} (DUPLICADO) ===`);
+                console.log('📋 Element completo:', element);
+                
+                if (!element.attributes || !Array.isArray(element.attributes)) {
+                    console.warn(`⚠️ ${element.name} no tiene atributos válidos, usando PK por defecto`);
+                    return { type: 'Long', name: 'id', sqlType: 'BIGINT' };
+                }
+                
+                console.log(`📋 Atributos (${element.attributes.length}):`, element.attributes);
+                
+                // Buscar atributo marcado explícitamente como PK
+                let pkAttr = element.attributes.find(attr => 
+                    typeof attr === 'object' && attr.isPrimaryKey === true
+                );
+                
+                // Si no encuentra PK explícita, buscar por convención (nombre 'id' o 'codigo')
+                if (!pkAttr) {
+                    pkAttr = element.attributes.find(attr => 
+                        typeof attr === 'object' && 
+                        (attr.name === 'id' || attr.name === 'codigo')
+                    );
+                    if (pkAttr) {
+                        console.log(`🔍 PK encontrada por convención: ${pkAttr.name}`);
+                        pkAttr.isPrimaryKey = true; // Marcarla como PK
+                    }
+                }
+                
+                if (pkAttr) {
+                    // Validar y normalizar tipo de dato
+                    let normalizedType = this.normalizeJavaType(pkAttr.type || 'Long');
+                    
+                    const sqlTypeMapping = {
+                        'Long': 'BIGINT',
+                        'Integer': 'INTEGER', 
+                        'String': 'VARCHAR(255)',
+                        'UUID': 'UUID',
+                        'int': 'INTEGER',
+                        'long': 'BIGINT',
+                        'Double': 'DECIMAL',
+                        'Float': 'FLOAT'
+                    };
+                    
+                    const result = { 
+                        type: normalizedType, 
+                        name: pkAttr.name,
+                        sqlType: sqlTypeMapping[normalizedType] || 'BIGINT'
+                    };
+                    
+                    console.log(`✅ PK detectada para ${element.name}:`, result);
+                    return result;
+                }
+                
+                console.warn(`⚠️ No se encontró PK para ${element.name}, usando por defecto`);
+                return { type: 'Long', name: 'id', sqlType: 'BIGINT' };
             }
 
             static addForeignKeyBasedOnRelation(fromEl, toEl, connection, referencedPK) {
@@ -5002,6 +5855,10 @@
             }
 
             static createConnection(sourceId) {
+                // 🎯 MARCAR COMO EDICIÓN REAL
+                window.IS_REAL_EDIT = true;
+                window.IS_ONLY_SELECTION = false;
+                
                 const targetId = document.getElementById('targetElement').value;
                 const relationType = document.getElementById('relationType').value;
                 const sourceMultiplicity = document.getElementById('sourceMultiplicity').value;
@@ -5024,6 +5881,11 @@
                 this.updateConnections();
                 bootstrap.Modal.getInstance(document.getElementById('connectionModal')).hide();
                 PersistenceManager.markAsChanged();
+                
+                // 🎯 RESETEAR FLAG DESPUÉS DE UN MOMENTO
+                setTimeout(() => {
+                    window.IS_REAL_EDIT = false;
+                }, 1000);
             }
 
             static startConnectionCreation(sourceElement, type) {
@@ -5074,6 +5936,314 @@
                 this.connectionType = null;
             }
 
+            static showManyToManyDialog() {
+                const elements = Array.from(DiagramManager.elements.values()).filter(el => 
+                    el.type === 'class' && el.stereotype !== 'association_table'
+                );
+                
+                if (elements.length < 2) {
+                    DiagramManager.showValidationMessage('Necesitas al menos 2 clases para crear una relación Muchos a Muchos', 'warning');
+                    return;
+                }
+                
+                const optionsHtml = elements.map(el => `<option value="${el.id}">${el.name}</option>`).join('');
+                
+                const html = `
+                    <div class="modal fade" id="manyToManyModal" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header bg-primary text-white">
+                                    <h5 class="modal-title">
+                                        <i class="fas fa-exchange-alt me-2"></i>
+                                        Crear Relación Muchos a Muchos
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>¿Qué hace esto?</strong><br>
+                                        Crea una relación Muchos a Muchos entre dos entidades usando una <strong>tabla intermedia</strong> 
+                                        con líneas segmentadas, tal como se muestra en diagramas ER profesionales.
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">
+                                                    <i class="fas fa-square text-primary me-1"></i>
+                                                    Primera Entidad
+                                                </label>
+                                                <select class="form-select" id="sourceEntityMN">
+                                                    <option value="">Seleccionar entidad...</option>
+                                                    ${optionsHtml}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">
+                                                    <i class="fas fa-square text-success me-1"></i>
+                                                    Segunda Entidad
+                                                </label>
+                                                <select class="form-select" id="targetEntityMN">
+                                                    <option value="">Seleccionar entidad...</option>
+                                                    ${optionsHtml}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">Multiplicidad Entidad 1</label>
+                                                <select class="form-select" id="sourceMultMN">
+                                                    <option value="M">M (Muchos)</option>
+                                                    <option value="0..*">0..* (Cero a muchos)</option>
+                                                    <option value="1..*" selected>1..* (Uno a muchos)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">Multiplicidad Entidad 2</label>
+                                                <select class="form-select" id="targetMultMN">
+                                                    <option value="N">N (Muchos)</option>
+                                                    <option value="0..*">0..* (Cero a muchos)</option>
+                                                    <option value="1..*" selected>1..* (Uno a muchos)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            <i class="fas fa-tag me-1"></i>
+                                            Nombre de la Relación (opcional)
+                                        </label>
+                                        <input type="text" class="form-control" id="relationLabelMN" 
+                                               placeholder="Ej: pertenece, tiene, se relaciona con">
+                                        <small class="form-text text-muted">
+                                            Se usará para etiquetar las conexiones. Si se deja vacío, se generará automáticamente.
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-eye text-info me-1"></i>
+                                                Vista Previa
+                                            </h6>
+                                            <p class="card-text small mb-0">
+                                                <span id="previewText">Selecciona ambas entidades para ver la vista previa...</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        <i class="fas fa-times me-1"></i>
+                                        Cancelar
+                                    </button>
+                                    <button type="button" class="btn btn-primary" onclick="ConnectionManager.createManyToManyFromDialog()">
+                                        <i class="fas fa-magic me-1"></i>
+                                        Crear Relación M:N
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.insertAdjacentHTML('beforeend', html);
+                const modal = new bootstrap.Modal(document.getElementById('manyToManyModal'));
+                modal.show();
+                
+                // Event listeners para vista previa
+                document.getElementById('sourceEntityMN').addEventListener('change', this.updateManyToManyPreview);
+                document.getElementById('targetEntityMN').addEventListener('change', this.updateManyToManyPreview);
+                
+                document.getElementById('manyToManyModal').addEventListener('hidden.bs.modal', function () {
+                    this.remove();
+                });
+            }
+
+            static updateManyToManyPreview() {
+                const sourceId = document.getElementById('sourceEntityMN').value;
+                const targetId = document.getElementById('targetEntityMN').value;
+                const previewText = document.getElementById('previewText');
+                
+                if (sourceId && targetId) {
+                    const sourceElement = DiagramManager.elements.get(sourceId);
+                    const targetElement = DiagramManager.elements.get(targetId);
+                    
+                    if (sourceElement && targetElement) {
+                        const tableName = `${sourceElement.name}${targetElement.name}`;
+                        previewText.innerHTML = `
+                            <strong>${sourceElement.name}</strong> 
+                            <span class="text-primary">←--</span> 
+                            <strong class="text-info">${tableName}</strong> 
+                            <span class="text-primary">--→</span> 
+                            <strong>${targetElement.name}</strong>
+                            <br><small class="text-muted">
+                                Se creará la tabla intermedia "${tableName}" con líneas segmentadas
+                            </small>
+                        `;
+                    }
+                } else {
+                    previewText.textContent = 'Selecciona ambas entidades para ver la vista previa...';
+                }
+            }
+
+            static createManyToManyFromDialog() {
+                const sourceId = document.getElementById('sourceEntityMN').value;
+                const targetId = document.getElementById('targetEntityMN').value;
+                const sourceMultiplicity = document.getElementById('sourceMultMN').value;
+                const targetMultiplicity = document.getElementById('targetMultMN').value;
+                const label = document.getElementById('relationLabelMN').value;
+                
+                if (!sourceId || !targetId) {
+                    DiagramManager.showValidationMessage('Debes seleccionar ambas entidades', 'error');
+                    return;
+                }
+                
+                if (sourceId === targetId) {
+                    DiagramManager.showValidationMessage('No puedes crear una relación muchos a muchos con la misma entidad', 'error');
+                    return;
+                }
+                
+                // Cerrar modal
+                bootstrap.Modal.getInstance(document.getElementById('manyToManyModal')).hide();
+                
+                // Crear la relación
+                this.createManyToManyConnection(sourceId, targetId, sourceMultiplicity, targetMultiplicity, label);
+            }
+
+            static showQuickConnectionDialog() {
+                const elements = Array.from(DiagramManager.elements.values());
+                
+                if (elements.length < 2) {
+                    DiagramManager.showValidationMessage('Necesitas al menos 2 elementos para crear relaciones', 'warning');
+                    return;
+                }
+                
+                const optionsHtml = elements.map(el => `<option value="${el.id}">${el.name} (${el.type})</option>`).join('');
+                
+                const html = `
+                    <div class="modal fade" id="quickConnectionModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="fas fa-link me-2"></i>
+                                        Crear Relación Rápida
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">Elemento Origen</label>
+                                                <select class="form-select" id="quickSourceElement">
+                                                    <option value="">Seleccionar...</option>
+                                                    ${optionsHtml}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">Elemento Destino</label>
+                                                <select class="form-select" id="quickTargetElement">
+                                                    <option value="">Seleccionar...</option>
+                                                    ${optionsHtml}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Tipo de Relación</label>
+                                        <select class="form-select" id="quickRelationType">
+                                            <option value="association">📋 Asociación</option>
+                                            <option value="aggregation">💎 Agregación</option>
+                                            <option value="composition">💠 Composición</option>
+                                            <option value="inheritance">🔺 Herencia</option>
+                                            <option value="dependency">⚡ Dependencia</option>
+                                            <option value="implementation">🔧 Implementación</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-lightbulb me-2"></i>
+                                        <strong>Tip:</strong> Para relaciones <strong>Muchos a Muchos</strong> con tabla intermedia, 
+                                        usa el botón específico "Muchos a Muchos" en el panel de herramientas.
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="button" class="btn btn-primary" onclick="ConnectionManager.createQuickConnection()">
+                                        <i class="fas fa-plus me-1"></i>
+                                        Crear Relación
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.insertAdjacentHTML('beforeend', html);
+                const modal = new bootstrap.Modal(document.getElementById('quickConnectionModal'));
+                modal.show();
+                
+                document.getElementById('quickConnectionModal').addEventListener('hidden.bs.modal', function () {
+                    this.remove();
+                });
+            }
+
+            static createQuickConnection() {
+                const sourceId = document.getElementById('quickSourceElement').value;
+                const targetId = document.getElementById('quickTargetElement').value;
+                const relationType = document.getElementById('quickRelationType').value;
+                
+                if (!sourceId || !targetId) {
+                    DiagramManager.showValidationMessage('Debes seleccionar ambos elementos', 'error');
+                    return;
+                }
+                
+                if (sourceId === targetId) {
+                    DiagramManager.showValidationMessage('No puedes crear una relación con el mismo elemento', 'error');
+                    return;
+                }
+                
+                // Crear conexión básica
+                const connection = {
+                    id: `conn_${Date.now()}`,
+                    source: sourceId,
+                    target: targetId,
+                    type: relationType,
+                    sourceMultiplicity: '',
+                    targetMultiplicity: '',
+                    label: ''
+                };
+                
+                this.connections.push(connection);
+                this.updateConnections();
+                
+                // Cerrar modal
+                bootstrap.Modal.getInstance(document.getElementById('quickConnectionModal')).hide();
+                
+                // Marcar cambios
+                PersistenceManager.markAsChanged();
+                
+                // Mostrar éxito
+                DiagramManager.showValidationMessage(
+                    `✅ Relación ${relationType} creada exitosamente`,
+                    'success'
+                );
+            }
+
             static showConnectionDialog(sourceId) {
                 const elements = Array.from(DiagramManager.elements.values()).filter(el => el.id !== sourceId);
                 if (elements.length === 0) {
@@ -5103,6 +6273,7 @@
                                     <option value="association">Asociación</option>
                                     <option value="aggregation">Agregación</option>
                                     <option value="composition">Composición</option>
+                                    <option value="many-to-many">Muchos a Muchos (con tabla intermedia)</option>
                                     <option value="inheritance">Herencia</option>
                                     <option value="dependency">Dependencia</option>
                                     <option value="implementation">Implementación</option>
@@ -5110,15 +6281,31 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Multiplicidad origen</label>
-                                <input type="text" class="form-control" id="sourceMultiplicity" placeholder="1"
+                                <select class="form-select" id="sourceMultiplicitySelect">
+                                    <option value="0..*">0..* (Cero a muchos)</option>
+                                    <option value="1..*">1..* (Uno a muchos)</option>
+                                    <option value="1">1 (Uno)</option>
+                                    <option value="0..1">0..1 (Cero a uno)</option>
+                                    <option value="*">* (Muchos)</option>
+                                    <option value="custom">Personalizada...</option>
+                                </select>
+                                <input type="text" class="form-control mt-2" id="sourceMultiplicity" placeholder="1" style="display: none;"
                                        title="Cardinalidades válidas: 1, 0..1, 1..1, *, 0..*, 1..*, n, 2..5, etc.">
-                                <small class="form-text text-muted">Ejemplos: 1, 0..1, *, 1..*, 2..5</small>
+                                <small class="form-text text-muted">Para relaciones muchos a muchos, use 0..* o 1..*</small>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Multiplicidad destino</label>
-                                <input type="text" class="form-control" id="targetMultiplicity" placeholder="*"
+                                <select class="form-select" id="targetMultiplicitySelect">
+                                    <option value="0..*">0..* (Cero a muchos)</option>
+                                    <option value="1..*">1..* (Uno a muchos)</option>
+                                    <option value="1">1 (Uno)</option>
+                                    <option value="0..1">0..1 (Cero a uno)</option>
+                                    <option value="*">* (Muchos)</option>
+                                    <option value="custom">Personalizada...</option>
+                                </select>
+                                <input type="text" class="form-control mt-2" id="targetMultiplicity" placeholder="*" style="display: none;"
                                        title="Cardinalidades válidas: 1, 0..1, 1..1, *, 0..*, 1..*, n, 2..5, etc.">
-                                <small class="form-text text-muted">Los símbolos UML se orientan automáticamente</small>
+                                <small class="form-text text-muted">Para relaciones muchos a muchos, use 0..* o 1..*</small>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Etiqueta (opcional)</label>
@@ -5136,6 +6323,37 @@
                 document.body.insertAdjacentHTML('beforeend', html);
                 const modal = new bootstrap.Modal(document.getElementById('connectionModal'));
                 modal.show();
+                
+                // Manejar los selectores de multiplicidad
+                const sourceSelect = document.getElementById('sourceMultiplicitySelect');
+                const targetSelect = document.getElementById('targetMultiplicitySelect');
+                const sourceInput = document.getElementById('sourceMultiplicity');
+                const targetInput = document.getElementById('targetMultiplicity');
+                
+                sourceSelect.addEventListener('change', function() {
+                    if (this.value === 'custom') {
+                        sourceInput.style.display = 'block';
+                        sourceInput.value = '';
+                    } else {
+                        sourceInput.style.display = 'none';
+                        sourceInput.value = this.value;
+                    }
+                });
+                
+                targetSelect.addEventListener('change', function() {
+                    if (this.value === 'custom') {
+                        targetInput.style.display = 'block';
+                        targetInput.value = '';
+                    } else {
+                        targetInput.style.display = 'none';
+                        targetInput.value = this.value;
+                    }
+                });
+                
+                // Configurar valores iniciales
+                sourceInput.value = sourceSelect.value;
+                targetInput.value = targetSelect.value;
+                
                 document.getElementById('connectionModal').addEventListener('hidden.bs.modal', function () {
                     this.remove();
                 });
@@ -5157,6 +6375,7 @@
                                     <option value="association" ${connectionType === 'association' ? 'selected' : ''}>Asociación - Línea sólida simple</option>
                                     <option value="aggregation" ${connectionType === 'aggregation' ? 'selected' : ''}>Agregación - Diamante hueco + línea sólida</option>
                                     <option value="composition" ${connectionType === 'composition' ? 'selected' : ''}>Composición - Diamante relleno + línea sólida</option>
+                                    <option value="many-to-many" ${connectionType === 'many-to-many' ? 'selected' : ''}>Muchos a Muchos - Línea recta con tabla intermedia</option>
                                     <option value="inheritance" ${connectionType === 'inheritance' ? 'selected' : ''}>Herencia - Triángulo hueco + línea sólida</option>
                                     <option value="dependency" ${connectionType === 'dependency' ? 'selected' : ''}>Dependencia - Flecha + línea punteada</option>
                                     <option value="implementation" ${connectionType === 'implementation' ? 'selected' : ''}>Implementación - Triángulo hueco + línea punteada</option>
@@ -5196,6 +6415,10 @@
             }
 
             static finishConnectionCreation(sourceId, targetId) {
+                // 🎯 MARCAR COMO EDICIÓN REAL
+                window.IS_REAL_EDIT = true;
+                window.IS_ONLY_SELECTION = false;
+                
                 const finalConnectionType = document.getElementById('detailsRelationType').value;
                 const sourceMultiplicity = document.getElementById('detailsSourceMultiplicity').value.trim();
                 const targetMultiplicity = document.getElementById('detailsTargetMultiplicity').value.trim();
@@ -5263,9 +6486,18 @@
                 this.updateConnections();
                 bootstrap.Modal.getInstance(document.getElementById('connectionDetailsModal')).hide();
                 PersistenceManager.markAsChanged();
+                
+                // 🎯 RESETEAR FLAG DESPUÉS DE UN MOMENTO
+                setTimeout(() => {
+                    window.IS_REAL_EDIT = false;
+                }, 1000);
             }
 
             static createConnection(sourceId) {
+                // 🎯 MARCAR COMO EDICIÓN REAL
+                window.IS_REAL_EDIT = true;
+                window.IS_ONLY_SELECTION = false;
+                
                 const targetId = document.getElementById('targetElement').value;
                 const relationType = document.getElementById('relationType').value;
                 const sourceMultiplicity = document.getElementById('sourceMultiplicity').value;
@@ -5275,24 +6507,207 @@
                     alert('Selecciona un elemento destino');
                     return;
                 }
-                const connection = {
-                    id: `conn_${Date.now()}`,
-                    source: sourceId,
-                    target: targetId,
-                    type: relationType,
-                    sourceMultiplicity,
-                    targetMultiplicity,
-                    label
-                };
-                this.connections.push(connection);
+                
+                // Manejar relación muchos a muchos con tabla intermedia
+                if (relationType === 'many-to-many') {
+                    this.createManyToManyConnection(sourceId, targetId, sourceMultiplicity, targetMultiplicity, label);
+                } else {
+                    const connection = {
+                        id: `conn_${Date.now()}`,
+                        source: sourceId,
+                        target: targetId,
+                        type: relationType,
+                        sourceMultiplicity,
+                        targetMultiplicity,
+                        label
+                    };
+                    this.connections.push(connection);
+                }
+                
                 this.updateConnections();
                 bootstrap.Modal.getInstance(document.getElementById('connectionModal')).hide();
+                
+                // 🎯 MARCAR COMO CAMBIADO PARA ACTIVAR SOCKET
+                PersistenceManager.markAsChanged();
+                
+                // 🎯 RESETEAR FLAG DESPUÉS DE UN MOMENTO
+                setTimeout(() => {
+                    window.IS_REAL_EDIT = false;
+                }, 1000);
+            }
+
+            static createManyToManyConnection(sourceId, targetId, sourceMultiplicity, targetMultiplicity, label) {
+                // Obtener los elementos fuente y destino
+                const sourceElement = DiagramManager.elements.get(sourceId);
+                const targetElement = DiagramManager.elements.get(targetId);
+                
+                if (!sourceElement || !targetElement) {
+                    alert('No se pudieron encontrar los elementos para crear la relación');
+                    return;
+                }
+                
+                // 🎯 Crear nombre elegante para la tabla intermedia
+                const sourceNameClean = sourceElement.name.replace(/[^a-zA-Z]/g, '');
+                const targetNameClean = targetElement.name.replace(/[^a-zA-Z]/g, '');
+                
+                // 🏷️ Generar nombres más profesionales
+                const shortNames = this.generateSmartTableName(sourceNameClean, targetNameClean);
+                const associationClassName = shortNames.tableName;
+                
+                // 📐 Calcular posición óptima y estética para la tabla intermedia
+                const midX = (sourceElement.x + targetElement.x) / 2;
+                const midY = (sourceElement.y + targetElement.y) / 2;
+                
+                // 📏 Posicionamiento inteligente para mejor visualización
+                const dx = targetElement.x - sourceElement.x;
+                const dy = targetElement.y - sourceElement.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // Calcular offset perpendicular a la línea principal
+                const perpX = -dy / distance * 80; // Perpendicular en X
+                const perpY = dx / distance * 80;  // Perpendicular en Y
+                
+                const finalX = Math.max(50, Math.min(midX + perpX, 1200));
+                const finalY = Math.max(50, Math.min(midY + perpY, 800));
+                
+                // 🏗️ Crear la clase de asociación (tabla intermedia) COMPACTA
+                const associationClass = new UMLClass(
+                    `assoc_class_${Date.now()}`,
+                    finalX - 60, // Más pequeño - centrar con menos espacio
+                    finalY - 30, // Más pequeño - centrar con menos espacio  
+                    associationClassName
+                );
+                associationClass.stereotype = 'association_table';
+                associationClass.visibility = 'public';
+                const sourcePK = this.getPrimaryKeyInfoWithValidation(sourceElement);
+                const targetPK = this.getPrimaryKeyInfoWithValidation(targetElement);
+                associationClass.attributes = [
+                    {
+                        name: shortNames.sourceFK,
+                        type: sourcePK.type,
+                        sqlType: sourcePK.sqlType,
+                        visibility: 'private',
+                        isForeignKey: true,
+                        isPrimaryKey: true,
+                        referencedEntity: sourceElement.name,
+                        referencedField: sourcePK.name,
+                        referencedType: sourcePK.type
+                    },
+                    {
+                        name: shortNames.targetFK,
+                        type: targetPK.type,
+                        sqlType: targetPK.sqlType,
+                        visibility: 'private',
+                        isForeignKey: true,
+                        isPrimaryKey: true,
+                        referencedEntity: targetElement.name,
+                        referencedField: targetPK.name,
+                        referencedType: targetPK.type
+                    }
+                ];
+                associationClass.methods = [];
+                DiagramManager.elements.set(associationClass.id, associationClass);
+                DiagramManager.addToCanvas(associationClass);
+                const directConnection = {
+                    id: `conn_${Date.now()}_direct`,
+                    source: sourceId,
+                    target: targetId,
+                    type: 'many-to-many-direct',
+                    sourceMultiplicity: sourceMultiplicity || '*',
+                    targetMultiplicity: targetMultiplicity || '*',
+                    label: label || '',
+                    associationTable: associationClass.id,
+                    manyToManyGroup: `mnm_${Date.now()}`,
+                    style: 'straight-intersection'
+                };
+                this.connections.push(directConnection);
+                this.updateConnections();
+                PersistenceManager.markAsChanged();
+                if (typeof pizarraColaborativa !== 'undefined' && pizarraColaborativa && pizarraColaborativa.isConnected) {
+                    pizarraColaborativa.broadcastChange('manyToManyRelationAdded', {
+                        sourceId,
+                        targetId,
+                        associationClass,
+                        connections: [directConnection],
+                        timestamp: Date.now()
+                    });
+                }
+                DiagramManager.showValidationMessage(
+                    `✅ Relación Muchos a Muchos creada: ${sourceElement.name} ↔ ${associationClassName} ↔ ${targetElement.name}`,
+                    'success'
+                );
+                return {
+                    associationClass,
+                    connections: [directConnection],
+                    type: 'many-to-many'
+                };
+            }
+
+            static generateSmartTableName(sourceName, targetName) {
+                const sourceShort = this.getSmartAbbreviation(sourceName);
+                const targetShort = this.getSmartAbbreviation(targetName);
+                let tableName, sourceFK, targetFK;
+                if ((sourceName + targetName).length > 15) {
+                    tableName = `${sourceShort}${targetShort}`;
+                    sourceFK = `${sourceShort.toLowerCase()}Id`;
+                    targetFK = `${targetShort.toLowerCase()}Id`;
+                } else {
+                    tableName = `${sourceName}${targetName}`;
+                    sourceFK = `${sourceName.toLowerCase()}Id`;
+                    targetFK = `${targetName.toLowerCase()}Id`;
+                }
+                return { tableName, sourceFK, targetFK };
+            }
+
+            static getSmartAbbreviation(name) {
+                if (name.length <= 4) return name;
+                const patterns = {
+                    'Usuario': 'Usr',
+                    'Producto': 'Prod', 
+                    'Cliente': 'Cli',
+                    'Pedido': 'Ped',
+                    'Categoria': 'Cat',
+                    'Articulo': 'Art',
+                    'Factura': 'Fact',
+                    'Empleado': 'Emp',
+                    'Departamento': 'Dept',
+                    'Proveedor': 'Prov'
+                };
+                for (const [full, abbr] of Object.entries(patterns)) {
+                    if (name.toLowerCase().includes(full.toLowerCase())) {
+                        return abbr;
+                    }
+                }
+                const consonants = name.match(/[BCDFGHJKLMNPQRSTVWXYZ]/gi);
+                if (consonants && consonants.length >= 2) {
+                    return consonants.slice(0, 3).join('');
+                }
+                return name.substring(0, Math.min(4, name.length));
             }
 
             static updateConnections() {
                 const svg = document.getElementById('connections');
                 svg.innerHTML = `
             <defs>
+                <!-- Gradiente para líneas muchos a muchos -->
+                <linearGradient id="gradientManyToMany" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#667eea;stop-opacity:1" />
+                </linearGradient>
+                
+                <!-- Gradiente animado para hover -->
+                <linearGradient id="gradientManyToManyHover" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#ff6b6b;stop-opacity:1">
+                        <animate attributeName="stop-color" values="#ff6b6b;#ee5a24;#ff6b6b" dur="2s" repeatCount="indefinite"/>
+                    </stop>
+                    <stop offset="50%" style="stop-color:#f093fb;stop-opacity:1">
+                        <animate attributeName="stop-color" values="#f093fb;#f5576c;#f093fb" dur="2s" repeatCount="indefinite"/>
+                    </stop>
+                    <stop offset="100%" style="stop-color:#ff6b6b;stop-opacity:1">
+                        <animate attributeName="stop-color" values="#ff6b6b;#ee5a24;#ff6b6b" dur="2s" repeatCount="indefinite"/>
+                    </stop>
+                </linearGradient>
                 <!-- Flecha UML estándar para dependencia -->
                 <marker id="arrowhead" markerWidth="10" markerHeight="10" 
                         refX="10" refY="5" orient="auto" markerUnits="strokeWidth">
@@ -5350,16 +6765,30 @@
             </defs>
         `;
 
+                // 🔄 Renderizar todas las conexiones (excepto las especiales)
                 this.connections.forEach(conn => {
+                    // 🚫 Saltar tipos de conexión específicos que se renderizan después
+                    if (conn.type === 'association-class-link' || conn.type === 'many-to-many-direct') return;
+                    
                     const sourceEl = document.getElementById(conn.source);
                     const targetEl = document.getElementById(conn.target);
+                    
                     if (sourceEl && targetEl) {
                         const sourceBounds = this.getElementBounds(sourceEl);
                         const targetBounds = this.getElementBounds(targetEl);
                         const connectionPoints = this.calculateConnectionPoints(sourceBounds, targetBounds);
+                        
                         const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                         group.setAttribute('class', 'connection-group');
                         group.setAttribute('data-connection-id', conn.id);
+                        
+                        // 🎯 Agregar identificador para relaciones M:N
+                        if (conn.isPartOfManyToMany) {
+                            group.setAttribute('data-many-to-many-group', conn.manyToManyGroup);
+                            group.classList.add('many-to-many-connection');
+                        }
+                        
+                        // 🖱️ Línea invisible para detección de clics
                         const clickLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                         clickLine.setAttribute('x1', connectionPoints.fromPoint.x);
                         clickLine.setAttribute('y1', connectionPoints.fromPoint.y);
@@ -5367,6 +6796,8 @@
                         clickLine.setAttribute('y2', connectionPoints.toPoint.y);
                         clickLine.setAttribute('class', 'connection-click-line');
                         clickLine.setAttribute('data-connection-id', conn.id);
+                        
+                        // 🔗 Línea visible de la conexión
                         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                         line.setAttribute('x1', connectionPoints.fromPoint.x);
                         line.setAttribute('y1', connectionPoints.fromPoint.y);
@@ -5374,26 +6805,197 @@
                         line.setAttribute('y2', connectionPoints.toPoint.y);
                         line.setAttribute('class', 'connection-line');
                         line.setAttribute('data-connection-id', conn.id);
+                        
+                        // 🎨 Aplicar estilos UML específicos
                         this.applyUMLStyle(line, conn.type, conn);
+                        
+                        // 📋 Event listener para menú contextual
                         clickLine.addEventListener('click', (e) => {
                             e.preventDefault();
                             e.stopPropagation();
                             this.showConnectionMenu(conn, e.clientX, e.clientY);
                         });
+                        
                         group.appendChild(clickLine);
                         group.appendChild(line);
+                        
+                        // 🏷️ Agregar etiquetas de la conexión
                         if (conn.label && conn.label.trim()) {
                             this.addConnectionLabel(group, connectionPoints, conn.label);
                         }
+                        
+                        // 🔢 Agregar multiplicidades/cardinalidades
                         if (conn.sourceMultiplicity && conn.sourceMultiplicity.trim()) {
                             this.addCardinalityLabel(group, connectionPoints, conn.sourceMultiplicity, 'source');
                         }
                         if (conn.targetMultiplicity && conn.targetMultiplicity.trim()) {
                             this.addCardinalityLabel(group, connectionPoints, conn.targetMultiplicity, 'target');
                         }
+                        
                         svg.appendChild(group);
                     }
                 });
+                
+                // 🔗 Renderizar conexiones especiales
+                this.connections.forEach(conn => {
+                    if (conn.type === 'association-class-link') {
+                        this.renderAssociationClassLink(conn, svg);
+                    } else if (conn.type === 'many-to-many-direct') {
+                        this.renderManyToManyDirect(conn, svg);
+                    }
+                });
+            }
+
+            static renderAssociationClassLink(conn, svg) {
+                // Encontrar la conexión principal y la clase de asociación
+                const mainConnection = this.connections.find(c => c.id === conn.mainConnectionId);
+                const associationClassEl = document.getElementById(conn.source);
+                
+                if (!mainConnection || !associationClassEl) return;
+                
+                // Obtener los elementos de la conexión principal
+                const sourceEl = document.getElementById(mainConnection.source);
+                const targetEl = document.getElementById(mainConnection.target);
+                
+                if (!sourceEl || !targetEl) return;
+                
+                // Calcular puntos de conexión de la línea principal
+                const sourceBounds = this.getElementBounds(sourceEl);
+                const targetBounds = this.getElementBounds(targetEl);
+                const mainConnectionPoints = this.calculateConnectionPoints(sourceBounds, targetBounds);
+                
+                // Calcular el punto medio de la línea principal
+                const midX = (mainConnectionPoints.fromPoint.x + mainConnectionPoints.toPoint.x) / 2;
+                const midY = (mainConnectionPoints.fromPoint.y + mainConnectionPoints.toPoint.y) / 2;
+                
+                // Calcular posición de la clase de asociación
+                const associationBounds = this.getElementBounds(associationClassEl);
+                const assocX = associationBounds.centerX;
+                const assocY = associationBounds.bottom; // Conectar desde la parte inferior de la clase
+                
+                // Crear la línea segmentada desde la clase de asociación hasta el punto medio de la línea principal
+                const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                group.setAttribute('class', 'association-class-group');
+                group.setAttribute('data-connection-id', conn.id);
+                
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', assocX);
+                line.setAttribute('y1', assocY);
+                line.setAttribute('x2', midX);
+                line.setAttribute('y2', midY);
+                line.setAttribute('class', 'connection-line association-class-link');
+                line.setAttribute('data-connection-id', conn.id);
+                
+                // Aplicar estilo de línea segmentada
+                line.setAttribute('stroke', '#000000');
+                line.setAttribute('stroke-width', '1.5');
+                line.setAttribute('stroke-dasharray', '5,3');
+                line.setAttribute('fill', 'none');
+                
+                group.appendChild(line);
+                svg.appendChild(group);
+            }
+
+            static renderManyToManyDirect(conn, svg) {
+                // Obtener elementos fuente y destino
+                const sourceEl = document.getElementById(conn.source);
+                const targetEl = document.getElementById(conn.target);
+                const associationEl = document.getElementById(conn.associationTable);
+                
+                if (!sourceEl || !targetEl || !associationEl) return;
+                
+                // Calcular bounds
+                const sourceBounds = this.getElementBounds(sourceEl);
+                const targetBounds = this.getElementBounds(targetEl);
+                const assocBounds = this.getElementBounds(associationEl);
+                
+                // Calcular puntos de conexión CORRECTOS
+                let sourceConnX, sourceConnY, targetConnX, targetConnY;
+                
+                // Determinar la mejor conexión basada en posiciones relativas
+                if (sourceBounds.centerX < targetBounds.centerX) {
+                    // Fuente a la izquierda del destino: conectar lado derecho de fuente con lado izquierdo de destino
+                    sourceConnX = sourceBounds.right;
+                    sourceConnY = sourceBounds.centerY;
+                    targetConnX = targetBounds.left;
+                    targetConnY = targetBounds.centerY;
+                } else {
+                    // Fuente a la derecha del destino: conectar lado izquierdo de fuente con lado derecho de destino
+                    sourceConnX = sourceBounds.left;
+                    sourceConnY = sourceBounds.centerY;
+                    targetConnX = targetBounds.right;
+                    targetConnY = targetBounds.centerY;
+                }
+                
+                // Punto medio de la línea horizontal principal
+                const midX = (sourceConnX + targetConnX) / 2;
+                const midY = (sourceConnY + targetConnY) / 2;
+                
+                const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                group.setAttribute('class', 'many-to-many-direct-group');
+                group.setAttribute('data-connection-id', conn.id);
+                
+
+                
+                // 📏 LÍNEA HORIZONTAL PRINCIPAL (entre las dos entidades)
+                const mainLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                mainLine.setAttribute('x1', sourceConnX);
+                mainLine.setAttribute('y1', sourceConnY);
+                mainLine.setAttribute('x2', targetConnX);
+                mainLine.setAttribute('y2', targetConnY);
+                mainLine.setAttribute('class', 'connection-line many-to-many-main');
+                mainLine.setAttribute('stroke', '#000000'); // Color negro final
+                mainLine.setAttribute('stroke-width', '2'); // Grosor normal
+                mainLine.setAttribute('fill', 'none');
+                // 🚫 Asegurar que NO tenga flechas
+                mainLine.removeAttribute('marker-start');
+                mainLine.removeAttribute('marker-end');
+                
+                // ⬇️ LÍNEA VERTICAL PUNTEADA (desde el medio hacia la tabla intermedia)
+                const verticalLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                verticalLine.setAttribute('x1', midX);
+                verticalLine.setAttribute('y1', midY);
+                verticalLine.setAttribute('x2', assocBounds.centerX);
+                verticalLine.setAttribute('y2', assocBounds.top);
+                verticalLine.setAttribute('class', 'connection-line many-to-many-vertical');
+                verticalLine.setAttribute('stroke', '#000000'); // Color negro final
+                verticalLine.setAttribute('stroke-width', '2'); // Grosor normal
+                verticalLine.setAttribute('stroke-dasharray', '5,5');
+                verticalLine.setAttribute('fill', 'none');
+                // 🚫 Asegurar que NO tenga flechas
+                verticalLine.removeAttribute('marker-start');
+                verticalLine.removeAttribute('marker-end');
+                
+                // Agregar líneas al grupo
+                group.appendChild(mainLine);
+                group.appendChild(verticalLine);
+                
+                // 🔢 Agregar multiplicidades en los extremos de la línea principal
+                if (conn.sourceMultiplicity) {
+                    const sourceMultLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    sourceMultLabel.setAttribute('x', sourceConnX + (sourceBounds.centerX < targetBounds.centerX ? 5 : -15));
+                    sourceMultLabel.setAttribute('y', sourceConnY - 5);
+                    sourceMultLabel.setAttribute('class', 'connection-multiplicity');
+                    sourceMultLabel.setAttribute('fill', '#374151');
+                    sourceMultLabel.setAttribute('font-size', '12px');
+                    sourceMultLabel.setAttribute('font-weight', 'bold');
+                    sourceMultLabel.textContent = conn.sourceMultiplicity;
+                    group.appendChild(sourceMultLabel);
+                }
+                
+                if (conn.targetMultiplicity) {
+                    const targetMultLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    targetMultLabel.setAttribute('x', targetConnX + (sourceBounds.centerX < targetBounds.centerX ? -15 : 5));
+                    targetMultLabel.setAttribute('y', targetConnY - 5);
+                    targetMultLabel.setAttribute('class', 'connection-multiplicity');
+                    targetMultLabel.setAttribute('fill', '#374151');
+                    targetMultLabel.setAttribute('font-size', '12px');
+                    targetMultLabel.setAttribute('font-weight', 'bold');
+                    targetMultLabel.textContent = conn.targetMultiplicity;
+                    group.appendChild(targetMultLabel);
+                }
+                
+                svg.appendChild(group);
             }
 
             static applyUMLStyle(line, type, connection) {
@@ -5442,12 +7044,17 @@
                         break;
                     case 'association':
                         line.setAttribute('stroke-width', '2');
-                        const arrowOrientation = this.getDirectionalityOrientation(connection);
-                        if (arrowOrientation === 'end') {
+                        break;
+                    case 'association-many-to-many':
+                        line.setAttribute('stroke-width', '2.5');
+                        line.setAttribute('stroke', '#2563eb');
+                        line.setAttribute('stroke-dasharray', '8,4');
+                        line.setAttribute('opacity', '0.9');
+                        const mmArrowOrientation = this.getDirectionalityOrientation(connection);
+                        if (mmArrowOrientation === 'end') {
                             line.setAttribute('marker-end', 'url(#arrowhead)');
-                        } else if (arrowOrientation === 'start') {
+                        } else if (mmArrowOrientation === 'start') {
                             line.setAttribute('marker-start', 'url(#arrowhead-rev)');
-                        } else if (connection.sourceMultiplicity || connection.targetMultiplicity) {
                         }
                         break;
                     case 'dependency':
@@ -5660,13 +7267,21 @@
                 const canvasRect = canvas.getBoundingClientRect();
                 const elementRect = element.getBoundingClientRect();
                 const scale = CanvasManager.scale || 1;
+                
+                const left = (elementRect.left - canvasRect.left) / scale;
+                const top = (elementRect.top - canvasRect.top) / scale;
+                const width = elementRect.width / scale;
+                const height = elementRect.height / scale;
+                
                 return {
-                    left: (elementRect.left - canvasRect.left) / scale,
-                    top: (elementRect.top - canvasRect.top) / scale,
-                    width: elementRect.width / scale,
-                    height: elementRect.height / scale,
-                    centerX: (elementRect.left - canvasRect.left) / scale + (elementRect.width / scale) / 2,
-                    centerY: (elementRect.top - canvasRect.top) / scale + (elementRect.height / scale) / 2
+                    left: left,
+                    top: top,
+                    width: width,
+                    height: height,
+                    right: left + width,
+                    bottom: top + height,
+                    centerX: left + width / 2,
+                    centerY: top + height / 2
                 };
             }
 
@@ -5884,6 +7499,9 @@
                                 <option value="composition" ${connection.type === 'composition' ? 'selected' : ''}>
                                     Composición - Diamante relleno + línea sólida
                                 </option>
+                                <option value="many-to-many" ${connection.type === 'many-to-many' ? 'selected' : ''}>
+                                    Muchos a Muchos - Línea recta con tabla intermedia
+                                </option>
                                 <option value="inheritance" ${connection.type === 'inheritance' ? 'selected' : ''}>
                                     Herencia - Triángulo hueco + línea sólida
                                 </option>
@@ -5972,12 +7590,30 @@
                 const menu = document.getElementById('connection-context-menu');
                 if (menu) menu.remove();
                 if (confirm('¿Estás seguro de que quieres eliminar esta relación?')) {
+                    // 🎯 MARCAR COMO EDICIÓN REAL
+                    window.IS_REAL_EDIT = true;
+                    window.IS_ONLY_SELECTION = false;
+                    
                     const index = this.connections.findIndex(c => c.id === connectionId);
                     if (index > -1) {
+                        const connection = this.connections[index];
                         this.connections.splice(index, 1);
                         this.updateConnections();
                         PersistenceManager.markAsChanged();
+                        
+                        // Emitir evento de socket para sincronización en tiempo real
+                        if (typeof pizarraColaborativa !== 'undefined' && pizarraColaborativa && pizarraColaborativa.isConnected) {
+                            pizarraColaborativa.broadcastChange('connectionDeleted', { 
+                                id: connectionId,
+                                connection: connection
+                            });
+                        }
                     }
+                    
+                    // 🎯 RESETEAR FLAG DESPUÉS DE UN MOMENTO
+                    setTimeout(() => {
+                        window.IS_REAL_EDIT = false;
+                    }, 1000);
                 }
             }
 
@@ -6014,6 +7650,12 @@
                         line.setAttribute('marker-start', 'url(#filledDiamond)');
                         line.style.stroke = '#000000';
                         line.style.strokeWidth = '2.5';
+                        break;
+                    case 'association-class-link':
+                        line.style.stroke = '#059669';
+                        line.style.strokeWidth = '2';
+                        line.style.strokeDasharray = '8,4';
+                        line.classList.add('association-class-link');
                         break;
                     case 'dependency':
                         line.setAttribute('marker-end', 'url(#arrowhead)');
@@ -6270,17 +7912,132 @@
             }
 
             static deleteConnection(connectionId) {
+                // 🎯 MARCAR COMO EDICIÓN REAL
+                window.IS_REAL_EDIT = true;
+                window.IS_ONLY_SELECTION = false;
+                
+                const connection = this.connections.find(conn => conn.id === connectionId);
                 this.connections = this.connections.filter(conn => conn.id !== connectionId);
                 this.updateConnections();
                 bootstrap.Modal.getInstance(document.getElementById('connectionOptionsModal')).hide();
                 PersistenceManager.markAsChanged();
+                
+                // Emitir evento de socket para sincronización en tiempo real
+                if (typeof pizarraColaborativa !== 'undefined' && pizarraColaborativa && pizarraColaborativa.isConnected && connection) {
+                    pizarraColaborativa.broadcastChange('connectionDeleted', { 
+                        id: connectionId,
+                        connection: connection
+                    });
+                }
+                
+                // 🎯 RESETEAR FLAG DESPUÉS DE UN MOMENTO
+                setTimeout(() => {
+                    window.IS_REAL_EDIT = false;
+                }, 1000);
             }
 
             static removeElementConnections(elementId) {
+                // Encontrar las conexiones que serán eliminadas antes de eliminarlas
+                const connectionsToRemove = this.connections.filter(
+                    conn => conn.source === elementId || conn.target === elementId
+                );
+                
                 this.connections = this.connections.filter(
                     conn => conn.source !== elementId && conn.target !== elementId
                 );
                 this.updateConnections();
+                
+                // Emitir eventos de socket para cada conexión eliminada
+                if (typeof pizarraColaborativa !== 'undefined' && pizarraColaborativa && pizarraColaborativa.isConnected) {
+                    connectionsToRemove.forEach(connection => {
+                        pizarraColaborativa.broadcastChange('connectionDeleted', { 
+                            id: connection.id,
+                            connection: connection
+                        });
+                    });
+                }
+            }
+
+            // 🔍 Método para detectar PK con validación (dentro de ConnectionManager)
+            static getPrimaryKeyInfoWithValidation(element) {
+                console.log(`🔍 [ConnectionManager] Analizando PKs para: ${element.name}`);
+                console.log('📋 Atributos disponibles:', element.attributes);
+                
+                if (!element.attributes || !Array.isArray(element.attributes)) {
+                    console.warn(`⚠️ ${element.name} no tiene atributos válidos, usando PK por defecto`);
+                    return { type: 'Long', name: 'id', sqlType: 'BIGINT' };
+                }
+                
+                // Buscar PK explícita
+                let pkAttr = element.attributes.find(attr => 
+                    typeof attr === 'object' && attr !== null && attr.isPrimaryKey === true
+                );
+                
+                // Buscar por convención
+                if (!pkAttr) {
+                    pkAttr = element.attributes.find(attr => 
+                        typeof attr === 'object' && attr !== null &&
+                        attr.name && (attr.name === 'id' || attr.name === 'codigo')
+                    );
+                    if (pkAttr) {
+                        console.log(`🔍 PK encontrada por convención: ${pkAttr.name}`);
+                        pkAttr.isPrimaryKey = true;
+                    }
+                }
+                
+                // Usar primer atributo disponible
+                if (!pkAttr && element.attributes.length > 0) {
+                    pkAttr = element.attributes.find(attr => 
+                        typeof attr === 'object' && attr !== null && 
+                        attr.name && attr.type
+                    );
+                    if (pkAttr) {
+                        console.log(`🔍 Usando primer atributo: ${pkAttr.name}`);
+                        pkAttr.isPrimaryKey = true;
+                    }
+                }
+                
+                if (pkAttr) {
+                    let rawType = pkAttr.type || 'Long';
+                    let normalizedType = this.normalizeJavaType(rawType);
+                    
+                    const sqlTypeMapping = {
+                        'Long': 'BIGINT',
+                        'Integer': 'INTEGER', 
+                        'String': 'VARCHAR(255)',
+                        'UUID': 'UUID',
+                        'int': 'INTEGER',
+                        'long': 'BIGINT',
+                        'Double': 'DECIMAL',
+                        'Float': 'FLOAT',
+                        'Boolean': 'BOOLEAN'
+                    };
+                    
+                    const result = { 
+                        type: normalizedType, 
+                        name: pkAttr.name,
+                        sqlType: sqlTypeMapping[normalizedType] || 'BIGINT'
+                    };
+                    
+                    console.log(`✅ [ConnectionManager] PK detectada:`, result);
+                    return result;
+                }
+                
+                console.warn(`⚠️ No PK encontrada para ${element.name}, usando defecto`);
+                return { type: 'Long', name: 'id', sqlType: 'BIGINT' };
+            }
+
+            // 🔧 Normalizar tipos Java (dentro de ConnectionManager)
+            static normalizeJavaType(type) {
+                const typeMap = {
+                    'string': 'String', 'String': 'String',
+                    'int': 'Integer', 'Integer': 'Integer',
+                    'long': 'Long', 'Long': 'Long',
+                    'double': 'Double', 'Double': 'Double',
+                    'float': 'Float', 'Float': 'Float',
+                    'boolean': 'Boolean', 'Boolean': 'Boolean'
+                };
+                return typeMap[type] || type || 'String';
             }
         }
 

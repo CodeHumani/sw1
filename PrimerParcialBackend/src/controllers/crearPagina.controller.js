@@ -287,33 +287,39 @@ spring.h2.console.enabled=true
 spring.h2.console.path=/h2-console
 
 # ========================================
-# CONFIGURACION JPA/HIBERNATE OPTIMIZADA
+# CONFIGURACION JPA/HIBERNATE OPTIMIZADA PARA M:N
 # ========================================
 # H2 DATABASE (Desarrollo/Testing):
-# create-drop: Recrea la BD completa cada vez (ideal para testing)
+# create-drop: Recrea la BD completa cada vez (ideal para testing con relaciones complejas)
 spring.jpa.hibernate.ddl-auto=create-drop
 spring.jpa.show-sql=true
 
 # PRESERVAR NOMBRES EXACTOS - SIN CONVERSIONES
-# Usar PhysicalNamingStrategyStandardImpl para mantener nombres EXACTAMENTE como están
+# Crítico para tablas intermedias y constraints de FK
 spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 spring.jpa.hibernate.naming.implicit-strategy=org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
 
-# Configuracion de Hibernate (sin duplicados)
+# Configuración mejorada para relaciones Many-to-Many
 spring.jpa.properties.hibernate.format_sql=true
 spring.jpa.properties.hibernate.use_sql_comments=true
 spring.jpa.properties.hibernate.jdbc.batch_size=20
 spring.jpa.properties.hibernate.order_inserts=true
 spring.jpa.properties.hibernate.order_updates=true
 
-# Logging controlado
+# Configuración específica para constraints y FKs
+spring.jpa.properties.hibernate.hbm2ddl.auto=create-drop
+spring.jpa.properties.hibernate.globally_quoted_identifiers=false
+spring.jpa.properties.hibernate.globally_quoted_identifiers_skip_column_definitions=true
+
+# Logging controlado para debugging de relaciones
 logging.level.org.hibernate.SQL=INFO
 logging.level.org.hibernate.type.descriptor.sql.BasicBinder=WARN
+logging.level.org.hibernate.tool.schema=DEBUG
 
 # ========================================
 # INSTRUCCIONES PARA POSTGRESQL
 # ========================================
-# Para usar PostgreSQL:
+# Para usar PostgreSQL con relaciones M:N:
 # 1. Crea la base de datos: CREATE DATABASE springboot_db;
 # 2. Ejecuta: mvnw spring-boot:run --spring.profiles.active=postgresql
 # 3. Usa el archivo: application-postgresql.properties
@@ -891,22 +897,51 @@ Para consultas específicas, revisa la documentación en \`RELACIONES.md\`
     let field = '';
     let annotations = '';
     const exactColumnName = attr.name;
-    if (isPK) {
+    
+    // 🔍 Detectar si es FK con constraint especial
+    const isCompositePK = attr.isPrimaryKey && attr.isForeignKey;
+    
+    if (isPK || isCompositePK) {
       if (attr.type === 'String') {
         annotations += `    @Id
-    @Column(name = "${exactColumnName}", length = 50)
+    @Column(name = "${exactColumnName}", length = 50`;
+        // Agregar constraint SQL si está disponible
+        if (attr.sqlType && attr.sqlType !== 'VARCHAR(255)') {
+          annotations += `, columnDefinition = "${attr.sqlType}"`;
+        }
+        annotations += `)
     @NotBlank
 `;
       } else {
         annotations += `    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "${exactColumnName}")
+`;
+        if (!isCompositePK) {
+          annotations += `    @GeneratedValue(strategy = GenerationType.IDENTITY)
+`;
+        }
+        annotations += `    @Column(name = "${exactColumnName}"`;
+        // Agregar información de tipo SQL para PKs/FKs compuestas
+        if (attr.sqlType && attr.sqlType !== 'BIGINT') {
+          annotations += `, columnDefinition = "${attr.sqlType}"`;
+        }
+        annotations += `)
 `;
       }
+      
+      // Agregar constraint de FK si es necesario
+      if (isCompositePK && attr.referencedEntity) {
+        annotations += `    // FK constraint: References ${attr.referencedEntity}(${attr.referencedField})
+`;
+      }
+      
     } else {
       annotations += `    @Column(name = "${exactColumnName}"`;
       if (attr.type === 'String') {
         annotations += `, length = 255`;
+      }
+      // Usar tipo SQL específico si está disponible
+      if (attr.sqlType && !['VARCHAR(255)', 'BIGINT'].includes(attr.sqlType)) {
+        annotations += `, columnDefinition = "${attr.sqlType}"`;
       }
       annotations += `)
 `;
@@ -1252,6 +1287,11 @@ Para consultas específicas, revisa la documentación en \`RELACIONES.md\`
 
   generarEntidadConRelaciones = async (projectPath, element, relacionesElement, herenciaInfo) => {
     const className = element.name;
+    
+    // 🎯 Detectar si es tabla intermedia (association table)
+    const esTablaIntermedia = element.isGeneratedAssociation || 
+      (element.tableMetadata && element.tableMetadata.primaryKeys && element.tableMetadata.primaryKeys.length > 1);
+    
     let entityContent = `package com.example.demo.entity;
 
 import jakarta.persistence.*;
@@ -1266,6 +1306,15 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 `;
+    
+    // 📝 Comentario especial para tablas intermedias
+    if (esTablaIntermedia) {
+      entityContent += `/**
+ * Tabla intermedia para relación Many-to-Many
+ * Configurada con clave primaria compuesta
+ */
+`;
+    }
     if (herenciaInfo && herenciaInfo[element.id]) {
       if (herenciaInfo[element.id].esClasePadre) {
         entityContent += `@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
@@ -1277,7 +1326,31 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
       }
     }
     entityContent += `@Entity
-@Table(name = "${className.toLowerCase()}")`;
+@Table(name = "${className.toLowerCase()}"`;
+    
+    // 🔑 Agregar constraints de tabla si están disponibles en metadata
+    if (element.tableMetadata && element.tableMetadata.constraints && element.tableMetadata.constraints.length > 0) {
+      entityContent += `,
+       uniqueConstraints = {
+`;
+      
+      // Agregar constraint de PK compuesta si existe
+      const pkConstraints = element.tableMetadata.constraints.filter(c => c.includes('PRIMARY KEY'));
+      if (pkConstraints.length > 0) {
+        entityContent += `           // Primary key constraint manejada por @Id annotations
+`;
+      }
+      
+      entityContent += `       }`;
+    }
+    
+    entityContent += `)`;
+    
+    // 🏗️ Agregar comentario SQL con constraints
+    if (element.tableMetadata && element.tableMetadata.constraints) {
+      entityContent += `
+// SQL Constraints: ${element.tableMetadata.constraints.join('; ')}`;
+    }
     const relacionesComposicion = relacionesElement.filter(rel => rel.esClavePrimariaCompuesta);
     if (relacionesComposicion.length > 0) {
       entityContent += `
@@ -1328,23 +1401,26 @@ public class ${className}${herenciaInfo && herenciaInfo[element.id] && herenciaI
         }
       }
     }
+    // 🔗 Procesar foreign keys y relaciones
     if (relacionesElement && relacionesElement.length > 0) {
       entityContent += `    // ===== FOREIGN KEYS GENERADAS POR RELACIONES =====
 `;
       for (const relacion of relacionesElement) {
         if (relacion.tipoRelacion !== 'inheritance') {
-          if (relacion.esClavePrimariaCompuesta) {
-            entityContent += `    @Id
-    @Column(name = "${relacion.fkName}")
-    private ${relacion.fkType} ${relacion.fkName};
-
-`;
-          } else {
-            entityContent += `    @Column(name = "${relacion.fkName}")
-    private ${relacion.fkType} ${relacion.fkName};
-
-`;
-          }
+          // Crear objeto de atributo con toda la información necesaria
+          const fkAttribute = {
+            name: relacion.fkName,
+            type: relacion.fkType,
+            isPrimaryKey: relacion.esClavePrimariaCompuesta || false,
+            isForeignKey: true,
+            sqlType: relacion.referencedSqlType || relacion.sqlType,
+            referencedEntity: relacion.referenciaA,
+            referencedField: relacion.pkReferenciado || 'id',
+            constraintType: relacion.constraintType
+          };
+          
+          // Usar la función mejorada para generar anotaciones
+          entityContent += this.generateFieldWithAnnotations(fkAttribute, fkAttribute.isPrimaryKey);
         }
       }
     }
