@@ -1309,12 +1309,9 @@
             </div>
         </div>
 
-        <!-- ==================== CHATBOT AI ==================== -->
-        <!-- Botón flotante para reabrir el chatbot -->
         <button class="ai-chatbot-toggle" id="ai-chatbot-toggle" onclick="AIChatbot.openChatbot()">
             <i class="fas fa-robot"></i>
         </button>
-        
         <div class="ai-chatbot" id="ai-chatbot">
             <div class="ai-chatbot-header">
                 <div class="ai-chatbot-title" onclick="AIChatbot.toggleMinimize()">
@@ -1332,7 +1329,6 @@
             </div>
             
             <div class="ai-chatbot-content">
-                <!-- Messages Area -->
                 <div class="ai-chat-messages" id="ai-chat-messages">
                     <div class="ai-message bot">
                         <div class="ai-message-bubble">
@@ -1342,10 +1338,7 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Input Panel -->
                 <div class="ai-input-panel">
-                    <!-- Mode Selection -->
                     <div class="ai-input-modes">
                         <button class="ai-mode-btn active" data-mode="text" onclick="AIChatbot.setMode('text')">
                             <i class="fas fa-keyboard"></i>
@@ -1360,10 +1353,7 @@
                             <span>Imagen</span>
                         </button>
                     </div>
-
-                    <!-- Input Area -->
                     <div class="ai-input-area">
-                        <!-- Text Input -->
                         <textarea 
                             class="ai-text-input" 
                             id="ai-text-input"
@@ -1380,8 +1370,6 @@
                             accept="image/*"
                             onchange="AIChatbot.handleFileUpload(event)"
                         />
-                        
-                        <!-- Send Button -->
                         <button class="ai-send-btn" id="ai-send-btn" onclick="AIChatbot.sendMessage()">
                             <i class="fas fa-paper-plane" id="send-icon"></i>
                         </button>
@@ -1507,27 +1495,63 @@
             }
 
             addAttribute(attribute) {
+                // 🎯 MARCAR COMO EDICIÓN REAL
+                window.IS_REAL_EDIT = true;
+                window.IS_ONLY_SELECTION = false;
+                
                 this.attributes.push(attribute);
                 this.updateDisplay();
                 PersistenceManager.markAsChanged();
+                
+                // 🎯 RESETEAR FLAG DESPUÉS DE UN MOMENTO
+                setTimeout(() => {
+                    window.IS_REAL_EDIT = false;
+                }, 1000);
             }
 
             addMethod(method) {
+                // 🎯 MARCAR COMO EDICIÓN REAL
+                window.IS_REAL_EDIT = true;
+                window.IS_ONLY_SELECTION = false;
+                
                 this.methods.push(method);
                 this.updateDisplay();
                 PersistenceManager.markAsChanged();
+                
+                // 🎯 RESETEAR FLAG DESPUÉS DE UN MOMENTO
+                setTimeout(() => {
+                    window.IS_REAL_EDIT = false;
+                }, 1000);
             }
 
             removeAttribute(index) {
+                // 🎯 MARCAR COMO EDICIÓN REAL
+                window.IS_REAL_EDIT = true;
+                window.IS_ONLY_SELECTION = false;
+                
                 this.attributes.splice(index, 1);
                 this.updateDisplay();
                 PersistenceManager.markAsChanged();
+                
+                // 🎯 RESETEAR FLAG DESPUÉS DE UN MOMENTO
+                setTimeout(() => {
+                    window.IS_REAL_EDIT = false;
+                }, 1000);
             }
 
             removeMethod(index) {
+                // 🎯 MARCAR COMO EDICIÓN REAL
+                window.IS_REAL_EDIT = true;
+                window.IS_ONLY_SELECTION = false;
+                
                 this.methods.splice(index, 1);
                 this.updateDisplay();
                 PersistenceManager.markAsChanged();
+                
+                // 🎯 RESETEAR FLAG DESPUÉS DE UN MOMENTO
+                setTimeout(() => {
+                    window.IS_REAL_EDIT = false;
+                }, 1000);
             }
 
             toHTML() {
@@ -1636,8 +1660,12 @@
                         if (e.target.closest('button[data-action]') || e.target.closest('button[onclick]')) {
                             return;
                         }
+                        
+                        // 🎯 SOLO SELECCIÓN INMEDIATA - NO DRAG INMEDIATO
                         DiagramManager.selectElement(this);
-                        DragManager.startDrag(e, this);
+                        
+                        // 🎯 CONFIGURAR DRAG SOLO SI HAY MOVIMIENTO REAL
+                        DragManager.prepareDrag(e, this);
                     });
                     element.addEventListener('click', (e) => {
                         if (e.target.closest('button[data-action]') || e.target.closest('button[onclick]')) {
@@ -1729,8 +1757,12 @@
                         if (e.target.closest('button[data-action]') || e.target.closest('button[onclick]')) {
                             return;
                         }
+                        
+                        // 🎯 SOLO SELECCIÓN INMEDIATA - NO DRAG INMEDIATO
                         DiagramManager.selectElement(this);
-                        DragManager.startDrag(e, this);
+                        
+                        // 🎯 CONFIGURAR DRAG SOLO SI HAY MOVIMIENTO REAL
+                        DragManager.prepareDrag(e, this);
                     });
                     element.addEventListener('click', (e) => {
                         if (e.target.closest('button[data-action]') || e.target.closest('button[onclick]')) {
@@ -1788,8 +1820,12 @@
                         if (e.target.closest('button[data-action]') || e.target.closest('button[onclick]')) {
                             return;
                         }
+                        
+                        // 🎯 SOLO SELECCIÓN INMEDIATA - NO DRAG INMEDIATO
                         DiagramManager.selectElement(this);
-                        DragManager.startDrag(e, this);
+                        
+                        // 🎯 CONFIGURAR DRAG SOLO SI HAY MOVIMIENTO REAL
+                        DragManager.prepareDrag(e, this);
                     });
                     element.addEventListener('click', (e) => {
                         if (e.target.closest('button[data-action]') || e.target.closest('button[onclick]')) {
@@ -1846,8 +1882,12 @@
                         if (e.target.closest('button[data-action]') || e.target.closest('button[onclick]')) {
                             return;
                         }
+                        
+                        // 🎯 SOLO SELECCIÓN INMEDIATA - NO DRAG INMEDIATO
                         DiagramManager.selectElement(this);
-                        DragManager.startDrag(e, this);
+                        
+                        // 🎯 CONFIGURAR DRAG SOLO SI HAY MOVIMIENTO REAL
+                        DragManager.prepareDrag(e, this);
                     });
                     element.addEventListener('click', (e) => {
                         if (e.target.closest('button[data-action]') || e.target.closest('button[onclick]')) {
@@ -2061,49 +2101,49 @@
             }
 
             static selectElement(element) {
-                // 🎯 DETECCIÓN DE SELECCIÓN SEGURA
                 if (window.BLOCK_ALL_SOCKET_IO || (window.aiChatbot && window.aiChatbot.isSelectingForAI)) {
-                    console.log('🎯 Selección en modo seguro - solo visual');
-                    
-                    // Solo selección visual, sin Socket.IO
                     if (this.selectedElement) {
                         document.getElementById(this.selectedElement.id)?.classList.remove('selected-element');
                     }
-                    
                     const domElement = document.getElementById(element.id);
                     if (domElement) {
                         domElement.classList.add('selected-element');
-                        
-                        // Usar sistema de propiedades de solo lectura
                         if (window.aiChatbot && typeof window.aiChatbot.showElementPropertiesViewOnly === 'function') {
                             window.aiChatbot.showElementPropertiesViewOnly(domElement);
                         }
                     }
-                    
                     this.selectedElement = element;
-                    return; // No ejecutar el resto del método
+                    return;
                 }
                 
-                // 🔄 SELECCIÓN NORMAL (con Socket.IO)
-                console.log('🔄 Selección normal - con eventos Socket.IO');
+                // 🔄 SELECCIÓN NORMAL CON FLAG DE SOLO SELECCIÓN
+                console.log('🔄 Selección normal - marcando como solo selección');
+                
+                // 🎯 MARCAR COMO SOLO SELECCIÓN (NO EDICIÓN REAL)
+                window.IS_ONLY_SELECTION = true;
+                window.IS_REAL_EDIT = false;
+                
                 if (this.selectedElement) {
                     this.selectedElement.deselect();
                 }
                 this.selectedElement = element;
                 element.select();
                 PropertiesManager.showProperties(element);
+                
+                // 🎯 DESACTIVAR FLAG DE SOLO SELECCIÓN DESPUÉS DE UN MOMENTO
+                setTimeout(() => {
+                    window.IS_ONLY_SELECTION = false;
+                    console.log('✅ Flag de solo selección desactivado');
+                }, 500);
+                
+                console.log('✅ Elemento seleccionado:', element.id, 'modo solo selección');
             }
 
             static deselectAll() {
-                console.log('🧹 DiagramManager.deselectAll() llamado');
-                
-                // 🎯 USAR SISTEMA DE SELECCIÓN PERSISTENTE
                 if (window.persistentSelection && window.persistentSelection.hasSelection()) {
-                    console.log('🧹 Limpiando selección persistente');
                     window.persistentSelection.clearSelection();
                 }
                 
-                // Limpiar selecciones tradicionales
                 document.querySelectorAll('.selected-element').forEach(el => {
                     el.classList.remove('selected-element');
                     el.removeAttribute('data-selecting');
@@ -2114,9 +2154,7 @@
                     this.selectedElement.deselect();
                     this.selectedElement = null;
                 }
-                
                 PropertiesManager.showEmpty();
-                console.log('✅ DiagramManager.deselectAll() completado');
             }
 
             static deleteElement(id) {
@@ -2260,6 +2298,10 @@
             }
 
             static validateAndUpdateElementName(elementId, newName) {
+                // 🎯 MARCAR COMO EDICIÓN REAL
+                window.IS_REAL_EDIT = true;
+                window.IS_ONLY_SELECTION = false;
+                
                 const element = this.elements.get(elementId);
                 if (!element || !newName.trim()) {
                     this.showValidationMessage('El nombre no puede estar vacío', 'error');
@@ -2276,6 +2318,12 @@
                 element.name = newName.trim();
                 element.updateDisplay();
                 PersistenceManager.markAsChanged();
+                
+                // 🎯 RESETEAR FLAG DESPUÉS DE UN MOMENTO
+                setTimeout(() => {
+                    window.IS_REAL_EDIT = false;
+                }, 1000);
+                
                 return true;
             }
 
@@ -2814,10 +2862,48 @@
             
             static redrawAll() {
             try {
+                // 🎯 PRESERVAR SELECCIÓN ACTUAL
+                let elementoSeleccionado = null;
+                let propiedadesVisibles = false;
+                
+                if (this.selectedElement) {
+                    elementoSeleccionado = this.selectedElement.id;
+                    // Verificar si el panel de propiedades está visible
+                    const propertiesPanel = document.getElementById('properties-panel');
+                    propiedadesVisibles = propertiesPanel && propertiesPanel.style.display !== 'none';
+                    console.log('🎯 Preservando selección:', elementoSeleccionado, 'propiedades visibles:', propiedadesVisibles);
+                }
+                
                 for (const element of this.elements.values()) {
                     element.updateDisplay();
                 }
                 ConnectionManager.updateConnections();
+                
+                // 🎯 RESTAURAR SELECCIÓN DESPUÉS DEL REDIBUJO
+                if (elementoSeleccionado && this.elements.has(elementoSeleccionado)) {
+                    const elementoRestaurado = this.elements.get(elementoSeleccionado);
+                    if (elementoRestaurado) {
+                        // Restaurar visualmente la selección
+                        const domElement = document.getElementById(elementoSeleccionado);
+                        if (domElement) {
+                            domElement.classList.add('selected-element');
+                            domElement.setAttribute('data-selected', 'true');
+                        }
+                        
+                        // Restaurar el elemento seleccionado en DiagramManager
+                        this.selectedElement = elementoRestaurado;
+                        
+                        // Restaurar las propiedades si estaban visibles
+                        if (propiedadesVisibles && typeof PropertiesManager !== 'undefined') {
+                            setTimeout(() => {
+                                PropertiesManager.showProperties(elementoRestaurado);
+                                console.log('✅ Propiedades restauradas para:', elementoSeleccionado);
+                            }, 50);
+                        }
+                        
+                        console.log('✅ Selección restaurada para:', elementoSeleccionado);
+                    }
+                }
             } catch (error) {
                 console.error('❌ Error redibujando el diagrama:', error);
             }
@@ -3038,6 +3124,9 @@
             static startX = 0;
             static startY = 0;
             static elementStartX = 0;
+            static pendingElement = null;
+            static dragThreshold = 5;
+            static hasMoved = false;
             static elementStartY = 0;
             static boundDrag = null;
             static boundStopDrag = null;
@@ -3050,6 +3139,59 @@
             static frameCount = 0;
             static lastPosition = null;
             static lastMove = 0;
+
+            static prepareDrag(e, element) {
+                // 🎯 PREPARAR DRAG PERO NO ACTIVAR INMEDIATAMENTE
+                e.preventDefault();
+                this.pendingElement = element;
+                this.startX = e.clientX;
+                this.startY = e.clientY;
+                this.elementStartX = element.x;
+                this.elementStartY = element.y;
+                this.dragThreshold = 5; // Píxeles de movimiento mínimo para activar drag
+                this.hasMoved = false;
+                
+                // 🎯 ESCUCHAR MOVIMIENTO PARA DETECTAR SI ES CLIC O DRAG
+                this.boundPrepareDrag = this.boundPrepareDrag || this.handleMouseMove.bind(this);
+                this.boundPrepareDragUp = this.boundPrepareDragUp || this.handleMouseUp.bind(this);
+                
+                document.addEventListener('mousemove', this.boundPrepareDrag, { 
+                    passive: false, 
+                    capture: true
+                });
+                document.addEventListener('mouseup', this.boundPrepareDragUp);
+            }
+            
+            static handleMouseMove(e) {
+                if (!this.pendingElement) return;
+                
+                const deltaX = Math.abs(e.clientX - this.startX);
+                const deltaY = Math.abs(e.clientY - this.startY);
+                const totalMovement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                
+                // 🎯 ACTIVAR DRAG SOLO SI HAY MOVIMIENTO SIGNIFICATIVO
+                if (totalMovement > this.dragThreshold && !this.hasMoved) {
+                    this.hasMoved = true;
+                    console.log('🎯 Activando drag - movimiento detectado:', totalMovement);
+                    this.startDrag(e, this.pendingElement);
+                }
+            }
+            
+            static handleMouseUp(e) {
+                if (!this.pendingElement) return;
+                
+                // 🎯 SI NO HUBO MOVIMIENTO, ES SOLO UN CLIC
+                if (!this.hasMoved) {
+                    console.log('✅ Solo clic detectado - sin activar drag');
+                    // No hacer nada más, la selección ya se hizo en mousedown
+                }
+                
+                // 🧹 LIMPIAR
+                this.pendingElement = null;
+                this.hasMoved = false;
+                document.removeEventListener('mousemove', this.boundPrepareDrag);
+                document.removeEventListener('mouseup', this.boundPrepareDragUp);
+            }
 
             static startDrag(e, element) {
                 e.preventDefault();
@@ -3076,12 +3218,8 @@
                 }
                 this.isDragging = true;
                 this.currentElement = element;
-                this.startX = e.clientX;
-                this.startY = e.clientY;
                 this.lastMouseX = e.clientX;
                 this.lastMouseY = e.clientY;
-                this.elementStartX = element.x;
-                this.elementStartY = element.y;
                 this.lastTimestamp = performance.now();
                 this.mouseVelocityX = 0;
                 this.mouseVelocityY = 0;
@@ -6163,6 +6301,11 @@
 
                 canvas.addEventListener('mousedown', (e) => {
                     if (e.target === canvas) {
+                        // 🎯 DESELECCIONAR ELEMENTOS AL HACER CLIC EN ÁREA VACÍA
+                        if (typeof DiagramManager !== 'undefined' && DiagramManager.selectedElement) {
+                            DiagramManager.deselectAll();
+                            console.log('🧹 Elemento deseleccionado - clic en área vacía');
+                        }
                         this.startPan(e);
                     }
                 });
@@ -6303,6 +6446,12 @@
                 // 🚫 BLOQUEO GLOBAL DE SOCKET.IO
                 if (window.BLOCK_ALL_SOCKET_IO) {
                     console.log('🚫 SOCKET.IO BLOQUEADO GLOBALMENTE - markAsChanged() ignorado');
+                    return;
+                }
+                
+                // 🎯 BLOQUEAR SI ES SOLO SELECCIÓN (NO EDICIÓN REAL)
+                if (window.IS_ONLY_SELECTION && !window.IS_REAL_EDIT) {
+                    console.log('🚫 SOCKET.IO BLOQUEADO - solo selección, no edición real');
                     return;
                 }
                 
@@ -8746,6 +8895,13 @@
                         console.warn('Datos insuficientes para procesarCambioInstantaneo:', data);
                         return;
                     }
+                    
+                    // 🎯 NO PROCESAR CAMBIOS DEL MISMO USUARIO (evitar loops)
+                    if (usuario && usuario.id === this.usuarioInfo?.id) {
+                        console.log('🚫 Ignorando cambio instantáneo del mismo usuario:', usuario.name);
+                        return;
+                    }
+                    
                     if (usuario && usuario.id) {
                         this.mostrarIndicadorUsuario(usuario, tipo);
                     }
@@ -8816,7 +8972,6 @@
                             elementoLocal.x = elemento.x;
                             elementoLocal.y = elemento.y;
                             DiagramManager.redrawAll();
-                            console.log(`✅ Posición actualizada para ${elemento.id}: (${elemento.x}, ${elemento.y})`);
                         }
                     }
                 } catch (error) {
@@ -8875,7 +9030,6 @@
 
             procesarOperacionElemento(data) {
                 const { operacion, elemento, usuario } = data;
-                
                 switch(operacion) {
                     case 'crear':
                         this.crearElementoRemoto(elemento);
@@ -8974,8 +9128,6 @@
                 DiagramManager.updateClass = function(id) {
                     const result = originalUpdateClass.call(this, id);
                     const element = this.elements.get(id);
-                    
-                    // 🚫 BLOQUEAR SI ESTÁ EN MODO SEGURO
                     if (window.BLOCK_ALL_SOCKET_IO) {
                         console.log('🚫 textoEditado cambioInstantaneo BLOQUEADO - modo seguro activo');
                         return;
