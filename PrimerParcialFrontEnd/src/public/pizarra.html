@@ -828,6 +828,26 @@
             border-top: 4px solid #3b82f6;
         }
 
+        /* ==================== SELECTION STYLES ==================== */
+        .selected-element {
+            border: 2px solid #007bff !important;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.3) !important;
+            background-color: rgba(0, 123, 255, 0.05) !important;
+        }
+
+        .class-element:hover,
+        [data-type="class"]:hover {
+            border: 1px solid #007bff;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+            cursor: pointer;
+        }
+
+        .attribute:hover,
+        .method:hover {
+            background-color: rgba(0, 123, 255, 0.1);
+            cursor: pointer;
+        }
+
         /* ==================== CHATBOT AI STYLES ==================== */
         .ai-chatbot {
             position: fixed;
@@ -2041,6 +2061,31 @@
             }
 
             static selectElement(element) {
+                // 🎯 DETECCIÓN DE SELECCIÓN SEGURA
+                if (window.BLOCK_ALL_SOCKET_IO || (window.aiChatbot && window.aiChatbot.isSelectingForAI)) {
+                    console.log('🎯 Selección en modo seguro - solo visual');
+                    
+                    // Solo selección visual, sin Socket.IO
+                    if (this.selectedElement) {
+                        document.getElementById(this.selectedElement.id)?.classList.remove('selected-element');
+                    }
+                    
+                    const domElement = document.getElementById(element.id);
+                    if (domElement) {
+                        domElement.classList.add('selected-element');
+                        
+                        // Usar sistema de propiedades de solo lectura
+                        if (window.aiChatbot && typeof window.aiChatbot.showElementPropertiesViewOnly === 'function') {
+                            window.aiChatbot.showElementPropertiesViewOnly(domElement);
+                        }
+                    }
+                    
+                    this.selectedElement = element;
+                    return; // No ejecutar el resto del método
+                }
+                
+                // 🔄 SELECCIÓN NORMAL (con Socket.IO)
+                console.log('🔄 Selección normal - con eventos Socket.IO');
                 if (this.selectedElement) {
                     this.selectedElement.deselect();
                 }
@@ -2050,11 +2095,28 @@
             }
 
             static deselectAll() {
+                console.log('🧹 DiagramManager.deselectAll() llamado');
+                
+                // 🎯 USAR SISTEMA DE SELECCIÓN PERSISTENTE
+                if (window.persistentSelection && window.persistentSelection.hasSelection()) {
+                    console.log('🧹 Limpiando selección persistente');
+                    window.persistentSelection.clearSelection();
+                }
+                
+                // Limpiar selecciones tradicionales
+                document.querySelectorAll('.selected-element').forEach(el => {
+                    el.classList.remove('selected-element');
+                    el.removeAttribute('data-selecting');
+                    el.removeAttribute('data-persistent-selected');
+                });
+                
                 if (this.selectedElement) {
                     this.selectedElement.deselect();
                     this.selectedElement = null;
                 }
+                
                 PropertiesManager.showEmpty();
+                console.log('✅ DiagramManager.deselectAll() completado');
             }
 
             static deleteElement(id) {
@@ -3199,8 +3261,10 @@
                 }
                 this.isDragging = false;
                 const finalElement = this.currentElement;
-                
-                // Emitir evento granular de movimiento
+                if (window.BLOCK_ALL_SOCKET_IO) {
+                    console.log('🚫 cambioInstantaneo BLOQUEADO - modo seguro activo');
+                    return;
+                }
                 if (finalElement && pizarraColaborativa && pizarraColaborativa.isConnected && pizarraColaborativa.usuarioInfo) {
                     pizarraColaborativa.socket.emit('cambioInstantaneo', {
                         tipo: 'elementoMovido',
@@ -3215,7 +3279,6 @@
                         timestamp: Date.now()
                     });
                 }
-                
                 this.currentElement = null;
                 this.lastMouseX = null;
                 this.lastMouseY = null;
@@ -3223,6 +3286,78 @@
         }
 
         class PropertiesManager {
+            static showPropertiesReadOnly(element) {
+                const content = document.getElementById('properties-content');
+                let actualElement = element;
+                if (element && element.id && !element.type) {
+                    actualElement = DiagramManager.elements.get(element.id) || 
+                                   DiagramManager.getClass(element.id) || 
+                                   element;
+                }
+                if (actualElement && (actualElement.type === 'class' || actualElement.classList?.contains('uml-class'))) {
+                    content.innerHTML = `
+                        <div class="alert alert-info">
+                            <i class="fas fa-eye me-2"></i>Modo visualización - Los cambios se aplicarán cuando edites un valor
+                        </div>
+                        <div class="property-group">
+                            <label>Nombre de la Clase</label>
+                            <input type="text" class="form-control" value="${actualElement.name || 'Sin nombre'}" 
+                                   onchange="window.aiChatbot ? window.aiChatbot.editClassProperties(document.getElementById('${actualElement.id || element.id}'), 'name', this.value) : void(0)" 
+                                   placeholder="Haz cambios para sincronizar">
+                        </div>
+                        <div class="property-group">
+                            <label>Estereotipo</label>
+                            <select class="form-select" onchange="window.aiChatbot ? window.aiChatbot.editClassProperties(document.getElementById('${actualElement.id || element.id}'), 'stereotype', this.value) : void(0)">
+                                <option value="" ${!actualElement.stereotype ? 'selected' : ''}>Ninguno</option>
+                                <option value="interface" ${actualElement.stereotype === 'interface' ? 'selected' : ''}>Interface</option>
+                                <option value="abstract" ${actualElement.stereotype === 'abstract' ? 'selected' : ''}>Abstract</option>
+                                <option value="entity" ${actualElement.stereotype === 'entity' ? 'selected' : ''}>Entity</option>
+                                <option value="controller" ${actualElement.stereotype === 'controller' ? 'selected' : ''}>Controller</option>
+                            </select>
+                        </div>
+                        <div class="property-group">
+                            <label>Visibilidad</label>
+                            <select class="form-select" onchange="window.aiChatbot ? window.aiChatbot.editClassProperties(document.getElementById('${actualElement.id || element.id}'), 'visibility', this.value) : void(0)">
+                                <option value="public" ${actualElement.visibility === 'public' ? 'selected' : ''}>Public</option>
+                                <option value="private" ${actualElement.visibility === 'private' ? 'selected' : ''}>Private</option>
+                                <option value="protected" ${actualElement.visibility === 'protected' ? 'selected' : ''}>Protected</option>
+                                <option value="package" ${actualElement.visibility === 'package' ? 'selected' : ''}>Package</option>
+                            </select>
+                        </div>
+                        <div class="property-group">
+                            <label>Posición</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="form-label small">X:</label>
+                                    <input type="number" class="form-control form-control-sm" value="${actualElement.x || 0}" 
+                                           onchange="window.aiChatbot ? window.aiChatbot.editClassProperties(document.getElementById('${actualElement.id || element.id}'), 'x', parseInt(this.value)) : void(0)">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small">Y:</label>
+                                    <input type="number" class="form-control form-control-sm" value="${actualElement.y || 0}" 
+                                           onchange="window.aiChatbot ? window.aiChatbot.editClassProperties(document.getElementById('${actualElement.id || element.id}'), 'y', parseInt(this.value)) : void(0)">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="property-group">
+                            <label>Atributos (${actualElement.attributes ? actualElement.attributes.length : 0})</label>
+                            <div class="small text-muted">Usa el modo edición completo para modificar atributos</div>
+                        </div>
+                        <div class="property-group">
+                            <label>Métodos (${actualElement.methods ? actualElement.methods.length : 0})</label>
+                            <div class="small text-muted">Usa el modo edición completo para modificar métodos</div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="btn btn-primary btn-sm" onclick="PropertiesManager.showProperties(DiagramManager.getClass('${actualElement.id || element.id}') || DiagramManager.elements.get('${actualElement.id || element.id}'))">
+                                <i class="fas fa-edit me-1"></i> Modo Edición Completa
+                            </button>
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('properties-panel').style.display = 'block';
+            }
+
             static showProperties(element) {
                 const content = document.getElementById('properties-content');
                 if (element.type === 'class') {
@@ -3376,6 +3511,15 @@
             }
 
             static showEmpty() {
+                // 🛡️ PROTECCIÓN: No limpiar panel si hay elementos AI seleccionados
+                const aiSelectedElement = document.querySelector('.selected-element');
+                const isSelectingByAI = document.querySelector('[data-selecting="true"]');
+                
+                if (aiSelectedElement || isSelectingByAI) {
+                    console.log('🚫 PropertiesManager.showEmpty() bloqueado - elemento AI seleccionado');
+                    return; // NO limpiar panel si hay selección de AI activa
+                }
+                
                 const content = document.getElementById('properties-content');
                 content.innerHTML = `
                     <div class="text-center text-muted p-4">
@@ -3383,6 +3527,7 @@
                         <p>Selecciona un elemento para ver sus propiedades</p>
                     </div>
                 `;
+                console.log('✅ PropertiesManager.showEmpty() ejecutado');
             }
         }
 
@@ -6023,8 +6168,33 @@
                 });
 
                 canvas.addEventListener('click', (e) => {
-                    if (e.target === canvas && !ToolManager.selectedTool) {
+                    console.log('🖱️ Click en canvas detectado:', e.target);
+                    
+                    // Solo deseleccionar si es click DIRECTO en el canvas (área vacía)
+                    const isDirectCanvasClick = e.target === canvas || e.target.tagName === 'svg';
+                    const clickedUMLElement = e.target.closest('.uml-class, .uml-interface, .uml-abstract, .uml-enum, .uml-package, .uml-note, .selected-element');
+                    const isSelecting = document.querySelector('[data-selecting="true"]');
+                    const hasSelectedElements = document.querySelector('.selected-element');
+                    
+                    console.log('🔍 Análisis del click:', {
+                        isDirectCanvasClick,
+                        clickedUMLElement: !!clickedUMLElement,
+                        isSelecting: !!isSelecting,
+                        hasSelectedElements: !!hasSelectedElements,
+                        targetTag: e.target.tagName,
+                        targetClasses: e.target.className
+                    });
+                    
+                    // SOLO deseleccionar si:
+                    // 1. Es click directo en canvas/svg (área vacía)
+                    // 2. NO hay herramienta seleccionada 
+                    // 3. NO se clickeó en elemento UML
+                    // 4. NO hay selección en progreso
+                    if (isDirectCanvasClick && !ToolManager.selectedTool && !clickedUMLElement && !isSelecting) {
+                        console.log('✅ Deseleccionando elementos - click en área vacía');
                         DiagramManager.deselectAll();
+                    } else {
+                        console.log('🚫 NO deseleccionar - click en elemento o selección activa');
                     }
                 });
             }
@@ -6129,12 +6299,26 @@
 
             static markAsChanged() {
                 this.hasChanges = true;
+                
+                // 🚫 BLOQUEO GLOBAL DE SOCKET.IO
+                if (window.BLOCK_ALL_SOCKET_IO) {
+                    console.log('🚫 SOCKET.IO BLOQUEADO GLOBALMENTE - markAsChanged() ignorado');
+                    return;
+                }
+                
+                // Check if we're in selection-only mode (no Socket.IO events)
+                if (window.pizarraColaborativa && window.pizarraColaborativa.isReceivingUpdate) {
+                    console.log('🚫 Selección visual - No enviando eventos Socket.IO');
+                    return;
+                }
+                
                 if (typeof CollaborationManager !== 'undefined' && CollaborationManager && 
                     CollaborationManager.isConnected && !CollaborationManager.isReceivingUpdate) {
                     try {
                         CollaborationManager.sendUpdate('fullState', {
                             state: CollaborationManager.getCurrentState()
                         });
+                        console.log('📤 Cambio real enviado por Socket.IO');
                     } catch (error) {
                         console.warn('Error al enviar actualización de colaboración:', error);
                     }
@@ -6913,10 +7097,26 @@
                     console.log('🔄 Parseando datos del diagrama desde el servidor...');
                     console.log('📄 Tipo de datos recibidos:', typeof xmlData);
                     
+                    // 🎯 ACTIVAR MODO SEGURO PARA CARGA DE DIAGRAMAS AI
+                    if (this.isSelectingForAI || window.BLOCK_ALL_SOCKET_IO) {
+                        console.log('🤖 Cargando diagrama generado por AI - modo seguro activo');
+                        window.BLOCK_ALL_SOCKET_IO = true;
+                        this.isSelectingForAI = true;
+                    }
+                    
                     // Si ya es un objeto, no necesitamos parsear
                     if (typeof xmlData === 'object' && xmlData !== null) {
                         console.log('✅ Los datos ya están en formato objeto, no es necesario parsear');
-                        return this.processDiagramData(xmlData);
+                        const result = this.processDiagramData(xmlData);
+                        
+                        // Desactivar modo seguro después de la carga
+                        setTimeout(() => {
+                            window.BLOCK_ALL_SOCKET_IO = false;
+                            this.isSelectingForAI = false;
+                            console.log('🔓 Modo seguro desactivado después de carga AI');
+                        }, 500);
+                        
+                        return result;
                     }
                     
                     // Verificar si hay datos para parsear
@@ -7284,6 +7484,12 @@
             }
 
             static async saveDiagram() {
+                // 🚫 BLOQUEAR GUARDADO DURANTE MODO SEGURO
+                if (window.BLOCK_ALL_SOCKET_IO) {
+                    console.log('🚫 saveDiagram BLOQUEADO - modo seguro activo (selección visual)');
+                    return;
+                }
+                
                 // Usar la sala ID actual (puede ser diferente de this.salaId si se cambió)
                 const salaId = this.currentSalaId || this.salaId;
                 
@@ -8155,9 +8361,9 @@
                     }
                     setTimeout(() => {
                         if (window.DiagramManager) {
-                            DiagramManager.render();
+                            DiagramManager.redrawAll();
                             setTimeout(() => {
-                                DiagramManager.render();                                
+                                DiagramManager.redrawAll();                                
                                 const canvas = document.getElementById('canvas');
                                 if (canvas) {
                                     const elementosEnDOM = canvas.querySelectorAll('.uml-element').length;
@@ -8609,7 +8815,7 @@
                         if (elementoLocal && elemento.x !== undefined && elemento.y !== undefined) {
                             elementoLocal.x = elemento.x;
                             elementoLocal.y = elemento.y;
-                            DiagramManager.render();
+                            DiagramManager.redrawAll();
                             console.log(`✅ Posición actualizada para ${elemento.id}: (${elemento.x}, ${elemento.y})`);
                         }
                     }
@@ -8629,7 +8835,7 @@
                         if (elementoLocal && elemento.width !== undefined && elemento.height !== undefined) {
                             elementoLocal.width = elemento.width;
                             elementoLocal.height = elemento.height;
-                            DiagramManager.render();
+                            DiagramManager.redrawAll();
                         }
                     }
                 } catch (error) {
@@ -8649,7 +8855,7 @@
                             if (elemento.name !== undefined) elementoLocal.name = elemento.name;
                             if (elemento.attributes !== undefined) elementoLocal.attributes = elemento.attributes;
                             if (elemento.methods !== undefined) elementoLocal.methods = elemento.methods;
-                            DiagramManager.render();
+                            DiagramManager.redrawAll();
                         }
                     }
                 } catch (error) {
@@ -8662,7 +8868,7 @@
                     const elementoLocal = DiagramManager.elements.get(elemento.id);
                     if (elementoLocal) {
                         Object.assign(elementoLocal, elemento);
-                        DiagramManager.render();
+                        DiagramManager.redrawAll();
                     }
                 }
             }
@@ -8692,7 +8898,7 @@
                 if (typeof DiagramManager !== 'undefined') {
                     if (!DiagramManager.elements.has(elemento.id)) {
                         DiagramManager.elements.set(elemento.id, elemento);
-                        DiagramManager.render();
+                        DiagramManager.redrawAll();
                     }
                 }
             }
@@ -8700,14 +8906,14 @@
             eliminarElementoRemoto(elementoId) {
                 if (typeof DiagramManager !== 'undefined' && DiagramManager.elements) {
                     DiagramManager.elements.delete(elementoId);
-                    DiagramManager.render();
+                    DiagramManager.redrawAll();
                 }
             }
 
             actualizarElementoCompleto(elemento) {
                 if (typeof DiagramManager !== 'undefined' && DiagramManager.elements) {
                     DiagramManager.elements.set(elemento.id, elemento);
-                    DiagramManager.render();
+                    DiagramManager.redrawAll();
                 }
             }
         }
@@ -8768,6 +8974,13 @@
                 DiagramManager.updateClass = function(id) {
                     const result = originalUpdateClass.call(this, id);
                     const element = this.elements.get(id);
+                    
+                    // 🚫 BLOQUEAR SI ESTÁ EN MODO SEGURO
+                    if (window.BLOCK_ALL_SOCKET_IO) {
+                        console.log('🚫 textoEditado cambioInstantaneo BLOQUEADO - modo seguro activo');
+                        return;
+                    }
+                    
                     if (element && pizarraColaborativa && pizarraColaborativa.isConnected) {
                         pizarraColaborativa.socket.emit('cambioInstantaneo', {
                             tipo: 'textoEditado',
@@ -9046,6 +9259,11 @@
                 const message = textInput.value.trim();
                 
                 if (!message) return;
+                
+                // 🤖 ACTIVAR MODO SEGURO AI ANTES DE GENERAR DIAGRAMA
+                console.log('🤖 Iniciando generación AI - activando modo seguro');
+                window.BLOCK_ALL_SOCKET_IO = true;
+                this.isSelectingForAI = true;
 
                 // Add user message to chat
                 this.addMessage('user', message);
@@ -9057,7 +9275,7 @@
 
                 try {
                     // Send to backend
-                    const response = await fetch('/apis/ai/generate-diagram', {
+                    const response = await fetch('http://localhost:8083/apis/ai/generate-diagram', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -9149,7 +9367,7 @@
                     formData.append('audio', audioBlob, 'recording.wav');
                     formData.append('salaId', this.salaId);
 
-                    const response = await fetch('/apis/ai/generate-diagram', {
+                    const response = await fetch('http://localhost:8083/apis/ai/generate-diagram', {
                         method: 'POST',
                         body: formData
                     });
@@ -9194,24 +9412,20 @@
                     const formData = new FormData();
                     formData.append('image', imageFile);
                     formData.append('salaId', this.salaId);
-
-                    const response = await fetch('/apis/ai/generate-diagram', {
+                    const response = await fetch('http://localhost:8083/apis/ai/generate-diagram', {
                         method: 'POST',
+                        credentials: 'include',
                         body: formData
                     });
-
                     const result = await response.json();
-                    
                     if (result.success) {
                         this.addMessage('bot', result.message);
-                        
                         if (result.diagram) {
                             this.applyDiagramToCanvas(result.diagram);
                         }
                     } else {
                         this.addMessage('bot', `❌ Error: ${result.error}`);
                     }
-                    
                 } catch (error) {
                     console.error('Error enviando imagen:', error);
                     this.addMessage('bot', '❌ Error procesando la imagen. Por favor intenta nuevamente.');
@@ -9224,15 +9438,11 @@
                 const messagesContainer = document.getElementById('ai-chat-messages');
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `ai-message ${sender}`;
-                
                 const bubbleDiv = document.createElement('div');
                 bubbleDiv.className = 'ai-message-bubble';
                 bubbleDiv.textContent = content;
-                
                 messageDiv.appendChild(bubbleDiv);
                 messagesContainer.appendChild(messageDiv);
-                
-                // Scroll to bottom
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }
 
@@ -9241,7 +9451,6 @@
                 const loadingDiv = document.createElement('div');
                 loadingDiv.className = 'ai-loading';
                 loadingDiv.id = 'ai-loading';
-                
                 loadingDiv.innerHTML = `
                     <span>AI generando diagrama</span>
                     <div class="ai-loading-dots">
@@ -9271,28 +9480,510 @@
             applyDiagramToCanvas(diagramData) {
                 console.log('🎨 Aplicando diagrama generado por AI:', diagramData);
                 
-                // Use the existing DiagramManager function to load the diagram
-                if (typeof DiagramManager !== 'undefined' && DiagramManager.loadDiagramFromXML) {
-                    try {
-                        const loadSuccess = DiagramManager.loadDiagramFromXML(JSON.stringify(diagramData));
-                        
-                        if (loadSuccess) {
-                            this.addMessage('bot', '✅ ¡Diagrama creado exitosamente en la pizarra!');
-                            
-                            // Trigger immediate sync for collaborative editing
-                            if (typeof immediateSync !== 'undefined') {
-                                setTimeout(immediateSync, 1000);
-                            }
-                        } else {
-                            this.addMessage('bot', '⚠️ El diagrama fue generado pero hubo un problema al aplicarlo.');
-                        }
-                    } catch (error) {
-                        console.error('Error aplicando diagrama:', error);
-                        this.addMessage('bot', '❌ Error aplicando el diagrama a la pizarra.');
+                try {
+                    // Clear existing content
+                    if (typeof DiagramManager !== 'undefined' && DiagramManager.clearAll) {
+                        DiagramManager.clearAll();
                     }
-                } else {
-                    this.addMessage('bot', '❌ No se pudo aplicar el diagrama. DiagramManager no está disponible.');
+                    
+                    // Create elements using the native creation functions that preserve event listeners
+                    if (diagramData && diagramData.elements) {
+                        diagramData.elements.forEach((element, index) => {
+                            if (element.type === 'class') {
+                                this.createInteractiveClass(element, index * 20); // Offset slightly to avoid overlapping
+                            }
+                        });
+                        
+                        // Create relationships after all elements are created
+                        if (diagramData.relationships) {
+                            setTimeout(() => {
+                                diagramData.relationships.forEach(rel => {
+                                    this.createRelationship(rel);
+                                });
+                            }, 300);
+                        }
+                        
+                        this.addMessage('bot', '✅ ¡Diagrama creado exitosamente con funcionalidad completa!');
+                        
+                        // Trigger sync for collaborative editing
+                        setTimeout(() => {
+                            if (typeof immediateSync !== 'undefined') {
+                                immediateSync();
+                            }
+                            
+                            // 🔓 DESACTIVAR MODO SEGURO AI DESPUÉS DE COMPLETAR DIAGRAMA
+                            setTimeout(() => {
+                                window.BLOCK_ALL_SOCKET_IO = false;
+                                this.isSelectingForAI = false;
+                                console.log('🔓 Modo seguro AI desactivado - diagramas listos para edición normal');
+                            }, 200);
+                        }, 800);
+                        
+                    } else {
+                        throw new Error('Datos de diagrama inválidos');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error aplicando diagrama:', error);
+                    this.addMessage('bot', '❌ Error aplicando el diagrama: ' + error.message);
+                    
+                    // 🔓 DESACTIVAR MODO SEGURO INCLUSO SI HAY ERROR
+                    setTimeout(() => {
+                        window.BLOCK_ALL_SOCKET_IO = false;
+                        this.isSelectingForAI = false;
+                        console.log('🔓 Modo seguro AI desactivado después de error');
+                    }, 500);
                 }
+            }
+
+            createInteractiveClass(classData, offset = 0) {
+                console.log('🏗️ Creando clase interactiva:', classData.name);
+                
+                try {
+                    // Use the native UMLClass constructor that preserves all functionality
+                    const position = {
+                        x: (classData.position?.x || 100) + offset,
+                        y: (classData.position?.y || 100) + offset
+                    };
+                    
+                    // Generate unique ID
+                    const classId = 'ai_class_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    
+                    // Create using native UMLClass constructor
+                    if (typeof UMLClass !== 'undefined') {
+                        const classElement = new UMLClass(classId, position.x, position.y, classData.name);
+                        
+                        // Add to elements array if it exists
+                        if (typeof elements !== 'undefined' && Array.isArray(elements)) {
+                            elements.push(classElement);
+                        }
+                        
+                        // Add attributes after class is created
+                        if (classData.attributes && classData.attributes.length > 0) {
+                            setTimeout(() => {
+                                classData.attributes.forEach(attr => {
+                                    this.addAttributeToClass(classElement, attr);
+                                });
+                            }, 100);
+                        }
+                        
+                        // Add methods after class is created
+                        if (classData.methods && classData.methods.length > 0) {
+                            setTimeout(() => {
+                                classData.methods.forEach(method => {
+                                    this.addMethodToClass(classElement, method);
+                                });
+                            }, 200);
+                        }
+                        
+                        console.log('✅ Clase UML creada exitosamente:', classData.name);
+                        return classElement;
+                        
+                    } else {
+                        throw new Error('UMLClass no está definida');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Error creando clase con UMLClass:', error);
+                    // Fallback: create using direct DOM manipulation
+                    return this.createClassDirectly(classData, offset);
+                }
+            }
+
+            addAttributeToClass(classElement, attribute) {
+                try {
+                    if (classElement && typeof classElement.addAttribute === 'function') {
+                        // Use the native UMLClass addAttribute method
+                        const attr = {
+                            name: attribute.name,
+                            type: attribute.type,
+                            visibility: attribute.visibility || 'public',
+                            isPrimaryKey: attribute.isPrimaryKey || false
+                        };
+                        classElement.addAttribute(attr);
+                        console.log('✅ Atributo agregado:', attribute.name);
+                    } else {
+                        console.warn('⚠️ No se pudo agregar atributo (método no disponible):', attribute.name);
+                    }
+                } catch (error) {
+                    console.error('❌ Error agregando atributo:', error);
+                }
+            }
+
+            addMethodToClass(classElement, method) {
+                try {
+                    if (classElement && typeof classElement.addMethod === 'function') {
+                        // Use the native UMLClass addMethod method
+                        const methodObj = {
+                            name: method.name,
+                            returnType: method.returnType || 'void',
+                            parameters: method.parameters || [],
+                            visibility: method.visibility || 'public'
+                        };
+                        classElement.addMethod(methodObj);
+                        console.log('✅ Método agregado:', method.name);
+                    } else {
+                        console.warn('⚠️ No se pudo agregar método (método no disponible):', method.name);
+                    }
+                } catch (error) {
+                    console.error('❌ Error agregando método:', error);
+                }
+            }
+
+            createClassDirectly(classData, offset = 0) {
+                console.log('🔨 Creando clase directamente:', classData.name);
+                
+                // This is a fallback that creates a basic interactive class
+                const canvas = document.getElementById('canvas') || document.querySelector('.canvas, #diagram-canvas, svg');
+                if (!canvas) {
+                    console.error('❌ No se encontró canvas para crear clase');
+                    return null;
+                }
+                
+                const position = {
+                    x: (classData.position?.x || 100) + offset,
+                    y: (classData.position?.y || 100) + offset
+                };
+                
+                // Create class element with proper structure and event listeners
+                const classId = 'class_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                
+                const classElement = document.createElement('div');
+                classElement.id = classId;
+                classElement.className = 'uml-class class-element';
+                classElement.style.position = 'absolute';
+                classElement.style.left = position.x + 'px';
+                classElement.style.top = position.y + 'px';
+                classElement.style.border = '2px solid #333';
+                classElement.style.backgroundColor = 'white';
+                classElement.style.minWidth = '150px';
+                classElement.style.cursor = 'pointer';
+                
+                // Add class structure
+                classElement.innerHTML = `
+                    <div class="class-header" style="background: #f0f0f0; padding: 8px; font-weight: bold; text-align: center;">
+                        ${classData.name}
+                    </div>
+                    <div class="class-attributes" style="border-top: 1px solid #ccc; padding: 4px;">
+                        ${classData.attributes?.map(attr => 
+                            `<div class="attribute" style="padding: 2px; cursor: pointer;">
+                                ${attr.visibility === 'private' ? '-' : attr.visibility === 'protected' ? '#' : '+'} 
+                                ${attr.name}: ${attr.type}
+                            </div>`
+                        ).join('') || '<div style="padding: 2px; color: #999;">Sin atributos</div>'}
+                    </div>
+                    <div class="class-methods" style="border-top: 1px solid #ccc; padding: 4px;">
+                        ${classData.methods?.map(method => 
+                            `<div class="method" style="padding: 2px; cursor: pointer;">
+                                ${method.visibility === 'private' ? '-' : method.visibility === 'protected' ? '#' : '+'} 
+                                ${method.name}(${method.parameters?.map(p => `${p.name}: ${p.type}`).join(', ') || ''}): ${method.returnType}
+                            </div>`
+                        ).join('') || '<div style="padding: 2px; color: #999;">Sin métodos</div>'}
+                    </div>
+                `;
+                
+                // Add click event listener for selection using unified method
+                classElement.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    e.stopImmediatePropagation(); // Prevent other event listeners
+                    e.preventDefault();
+                    console.log('🖱️ Clase clickeada:', classData.name);
+                    
+                    // Use the unified selection method from AIChatbot class
+                    if (window.aiChatbot && typeof window.aiChatbot.selectClassForEditing === 'function') {
+                        window.aiChatbot.selectClassForEditing(classElement);
+                    } else {
+                        // Fallback: Direct PropertiesManager call
+                        // Remove previous selection
+                        document.querySelectorAll('.selected-element').forEach(el => {
+                            el.classList.remove('selected-element');
+                        });
+                        
+                        // Select this element
+                        classElement.classList.add('selected-element');
+                        
+                        // Show properties using PropertiesManager
+                        if (typeof PropertiesManager !== 'undefined' && PropertiesManager.showProperties) {
+                            PropertiesManager.showProperties(classElement);
+                            console.log('✅ Panel de propiedades mostrado para:', classData.name);
+                        }
+                    }
+                }, true); // Use capture phase for higher priority
+                
+                canvas.appendChild(classElement);
+                console.log('✅ Clase creada exitosamente:', classData.name);
+                return classElement;
+            }
+
+            createRelationship(relationshipData) {
+                // Implement relationship creation if needed
+                console.log('🔗 Creando relación:', relationshipData.type);
+                // This would need to be implemented based on your relationship system
+            }
+
+            restoreInteractionFunctionality() {
+                console.log('🔧 Restaurando funcionalidad de interacción...');
+                
+                // Wait a bit for elements to be fully rendered
+                setTimeout(() => {
+                    // Look for various possible class selectors
+                    const classSelectors = [
+                        '.class-element',
+                        '[data-type="class"]',
+                        '.uml-class',
+                        '.class',
+                        'g[data-type="class"]',
+                        'g.class-element'
+                    ];
+                    
+                    let classes = [];
+                    classSelectors.forEach(selector => {
+                        const found = document.querySelectorAll(selector);
+                        found.forEach(el => {
+                            if (!classes.includes(el)) {
+                                classes.push(el);
+                            }
+                        });
+                    });
+                    
+                    console.log(`🔍 Encontrados ${classes.length} elementos de clase`);
+                    
+                    classes.forEach((classElement, index) => {
+                        console.log(`📋 Configurando elemento ${index + 1}:`, classElement);
+                        
+                        // Remove any existing event listeners to avoid duplicates
+                        const newClassElement = classElement.cloneNode(true);
+                        classElement.parentNode.replaceChild(newClassElement, classElement);
+                        
+                        // Add click event listener for class selection
+                        newClassElement.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+                            e.preventDefault();
+                            console.log('🖱️ Click en clase detectado:', newClassElement);
+                            this.selectClassForEditing(newClassElement);
+                        }, true); // Use capture phase for higher priority
+                        
+                        // Ensure the element is properly styled for interaction
+                        newClassElement.style.cursor = 'pointer';
+                        
+                        // Add visual feedback
+                        newClassElement.addEventListener('mouseenter', () => {
+                            newClassElement.style.opacity = '0.8';
+                        });
+                        
+                        newClassElement.addEventListener('mouseleave', () => {
+                            newClassElement.style.opacity = '1';
+                        });
+                    });
+
+                    // Re-enable attribute and method editing
+                    const attributes = document.querySelectorAll('.attribute, .method, .class-attribute, .class-method');
+                    attributes.forEach(element => {
+                        element.style.cursor = 'pointer';
+                    });
+                    this.setupPropertyPanelEvents();
+                }, 300);
+            }
+
+            selectClassForEditing(classElement) {
+                console.log('🎯 SELECCIÓN PURA - SIN SOCKET.IO');
+                console.log('🔍 DEBUG - Elemento recibido:', {
+                    id: classElement.id,
+                    type: classElement.type,
+                    classList: classElement.classList ? Array.from(classElement.classList) : 'no classList',
+                    attributes: classElement.getAttributeNames ? classElement.getAttributeNames() : 'no getAttributeNames',
+                    innerHTML: classElement.innerHTML ? classElement.innerHTML.substring(0, 100) + '...' : 'no innerHTML'
+                });
+                
+                // 🚫 BLOQUEO TOTAL DE SOCKET.IO DURANTE SELECCIÓN
+                window.BLOCK_ALL_SOCKET_IO = true;
+                console.log('🚫 TODOS LOS EVENTOS SOCKET.IO BLOQUEADOS');
+                
+                // 🎯 USAR SISTEMA DE SELECCIÓN PERSISTENTE
+                if (window.persistentSelection) {
+                    window.persistentSelection.setSelected(classElement);
+                } else {
+                    // Fallback si el sistema persistente no está listo
+                    classElement.classList.add('selected-element');
+                    classElement.setAttribute('data-selecting', 'true');
+                    console.log('🔄 Usando selección fallback');
+                }
+                
+                setTimeout(() => {
+                    classElement.classList.add('selected-element');
+                    this.showElementPropertiesViewOnly(classElement);
+                    setTimeout(() => {
+                        const propertiesPanel = document.querySelector('#properties-panel');
+                        if (propertiesPanel) {
+                            propertiesPanel.style.display = 'block';
+                            console.log('🔒 Panel de propiedades fijado como visible');
+                        }
+                    }, 100);
+                    classElement.removeAttribute('data-selecting');
+                    setTimeout(() => {
+                        window.BLOCK_ALL_SOCKET_IO = false;
+                        console.log('🔓 SOCKET.IO DESBLOQUEADO - listo para cambios reales');
+                    }, 200);
+                }, 50);
+            }
+
+            showElementPropertiesViewOnly(domElement) {
+                let realElement = null;
+                if (DiagramManager && DiagramManager.elements) {
+                    realElement = DiagramManager.elements.get(domElement.id);
+                }
+                if (!realElement && DiagramManager && DiagramManager.getClass) {
+                    realElement = DiagramManager.getClass(domElement.id);
+                }
+                if (!realElement) {
+                    realElement = this.extractElementDataFromDOM(domElement);
+                }
+                this.renderPropertiesViewOnly(realElement, domElement.id);
+            }
+
+            extractElementDataFromDOM(domElement) {
+                const nameElement = domElement.querySelector('.class-name');
+                const attributeElements = domElement.querySelectorAll('.attribute, .class-attribute');
+                const methodElements = domElement.querySelectorAll('.method, .class-method');
+                return {
+                    id: domElement.id,
+                    type: 'class',
+                    name: nameElement ? nameElement.textContent.trim() : 'Sin nombre',
+                    attributes: Array.from(attributeElements).map(attr => ({
+                        name: attr.textContent.trim(),
+                        type: 'string',
+                        visibility: 'public'
+                    })),
+                    methods: Array.from(methodElements).map(method => ({
+                        name: method.textContent.trim(),
+                        returnType: 'void',
+                        visibility: 'public'
+                    })),
+                    x: parseInt(domElement.style.left) || 0,
+                    y: parseInt(domElement.style.top) || 0,
+                    visibility: 'public',
+                    stereotype: ''
+                };
+            }
+
+            renderPropertiesViewOnly(element, elementId) {
+                const content = document.getElementById('properties-content');
+                if (!content) {
+                    console.error('❌ No se encontró properties-content');
+                    return;
+                }
+                content.innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="fas fa-eye me-2"></i><strong>Modo Visualización</strong><br>
+                        <small>Los cambios se aplicarán cuando edites valores y se sincronizarán automáticamente.</small>
+                    </div>
+                    <div class="property-group">
+                        <label><strong>Nombre de la Clase</strong></label>
+                        <input type="text" class="form-control" value="${element.name || 'Sin nombre'}" readonly 
+                               style="background-color: #f8f9fa;">
+                    </div>
+                    <div class="property-group">
+                        <label><strong>Tipo</strong></label>
+                        <input type="text" class="form-control" value="${element.type || 'class'}" readonly 
+                               style="background-color: #f8f9fa;">
+                    </div>
+                    <div class="property-group">
+                        <label><strong>Atributos (${element.attributes ? element.attributes.length : 0})</strong></label>
+                        <div class="list-group list-group-flush">
+                            ${element.attributes && element.attributes.length > 0 ? 
+                                element.attributes.map(attr => `
+                                    <div class="list-group-item small">
+                                        <code>${attr.visibility || 'public'} ${attr.name || 'atributo'}: ${attr.type || 'string'}</code>
+                                    </div>
+                                `).join('') : 
+                                '<div class="text-muted small">Sin atributos definidos</div>'
+                            }
+                        </div>
+                    </div>
+                    <div class="property-group">
+                        <label><strong>Métodos (${element.methods ? element.methods.length : 0})</strong></label>
+                        <div class="list-group list-group-flush">
+                            ${element.methods && element.methods.length > 0 ? 
+                                element.methods.map(method => `
+                                    <div class="list-group-item small">
+                                        <code>${method.visibility || 'public'} ${method.name || 'metodo'}(): ${method.returnType || 'void'}</code>
+                                    </div>
+                                `).join('') : 
+                                '<div class="text-muted small">Sin métodos definidos</div>'
+                            }
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-outline-primary btn-sm" onclick="alert('Funcionalidad de edición completa próximamente')">
+                            <i class="fas fa-edit me-1"></i> Editar Propiedades
+                        </button>
+                    </div>
+                `;
+                
+                // Asegurar que el panel sea visible
+                const propertiesPanel = document.getElementById('properties-panel');
+                if (propertiesPanel) {
+                    propertiesPanel.style.display = 'block';
+                }
+                
+                console.log('✅ Propiedades renderizadas en modo SOLO VISUALIZACIÓN');
+            }
+
+            // Method for actual editing (DOES send Socket.IO events)
+            editClassProperties(classElement, property, newValue) {
+                console.log('✏️ Editando propiedad real:', property, '=', newValue);
+                
+                // Get the actual element object
+                const element = DiagramManager.elements.get(classElement.id) || 
+                               DiagramManager.getClass(classElement.id);
+                
+                if (element && element[property] !== newValue) {
+                    // Make the actual change
+                    element[property] = newValue;
+                    
+                    // Update the visual display
+                    if (element.updateDisplay) {
+                        element.updateDisplay();
+                    }
+                    
+                    // Now mark as changed (this WILL send Socket.IO events)
+                    PersistenceManager.markAsChanged();
+                    
+                    console.log('📤 Cambio real enviado por Socket.IO:', property, '=', newValue);
+                }
+            }
+
+            setupPropertyPanelEvents() {
+                // Ensure property panel is visible and functional
+                const propertyPanel = document.getElementById('property-panel') || 
+                                   document.querySelector('.property-panel') ||
+                                   document.querySelector('#properties-panel') ||
+                                   document.querySelector('#elementProperties');
+                
+                if (propertyPanel) {
+                    propertyPanel.style.display = 'block';
+                    console.log('✅ Panel de propiedades habilitado:', propertyPanel);
+                } else {
+                    console.warn('⚠️ No se encontró panel de propiedades');
+                    // Debug: list all possible panels
+                    const allPanels = document.querySelectorAll('[id*="panel"], [id*="properties"], [class*="panel"], [class*="properties"]');
+                    console.log('📋 Paneles encontrados:', allPanels);
+                }
+            }
+
+            // Debug function to check elements after diagram generation
+            debugElements() {
+                console.log('🔍 DEBUG: Elementos en el DOM después de generar diagrama');
+                
+                const allElements = document.querySelectorAll('*[class*="class"], *[data-type], svg g, .uml-element');
+                console.log('📊 Total elementos encontrados:', allElements.length);
+                
+                allElements.forEach((el, index) => {
+                    console.log(`${index + 1}.`, el.tagName, el.className, el.getAttribute('data-type'), el);
+                });
+                
+                return allElements;
             }
         }
 
@@ -9306,6 +9997,75 @@
                 
                 // Initialize AI Chatbot
                 window.aiChatbot = new AIChatbot();
+                
+                    // 🛡️ PROTECCIÓN GLOBAL: Watcher para el panel de propiedades
+                setTimeout(() => {
+                    const propertiesPanel = document.getElementById('properties-panel');
+                    if (propertiesPanel) {
+                        const observer = new MutationObserver((mutations) => {
+                            const aiSelectedElement = document.querySelector('.selected-element');
+                            if (aiSelectedElement && propertiesPanel.style.display === 'none') {
+                                console.log('🚨 Panel oculto detectado - restaurando para elemento AI');
+                                propertiesPanel.style.display = 'block';
+                            }
+                        });
+                        
+                        observer.observe(propertiesPanel, {
+                            attributes: true,
+                            attributeFilter: ['style']
+                        });
+                        
+                        console.log('🛡️ Watcher del panel de propiedades activado');
+                    }
+                    
+                    // 🚫 INTERCEPTAR TODOS LOS SOCKET.IO EMITS
+                    if (window.pizarraColaborativa && window.pizarraColaborativa.socket) {
+                        const originalEmit = window.pizarraColaborativa.socket.emit;
+                        
+                        window.pizarraColaborativa.socket.emit = function(...args) {
+                            if (window.BLOCK_ALL_SOCKET_IO) {
+                                console.log('🚫 Socket.emit BLOQUEADO:', args[0]);
+                                return;
+                            }
+                            console.log('📤 Socket.emit PERMITIDO:', args[0]);
+                            return originalEmit.apply(this, args);
+                        };
+                        
+                        console.log('🛡️ Interceptor Socket.IO activado');
+                    }                    // 🎯 SISTEMA DE SELECCIÓN PERSISTENTE
+                    window.persistentSelection = {
+                        currentElement: null,
+                        
+                        setSelected: function(element) {
+                            console.log('🎯 Estableciendo selección persistente:', element);
+                            
+                            // Limpiar selección previa
+                            this.clearSelection();
+                            
+                            // Marcar nuevo elemento
+                            this.currentElement = element;
+                            element.classList.add('selected-element');
+                            element.setAttribute('data-persistent-selected', 'true');
+                            
+                            console.log('✅ Selección persistente establecida');
+                        },
+                        
+                        clearSelection: function() {
+                            if (this.currentElement) {
+                                console.log('🧹 Limpiando selección persistente');
+                                this.currentElement.classList.remove('selected-element');
+                                this.currentElement.removeAttribute('data-persistent-selected');
+                                this.currentElement = null;
+                            }
+                        },
+                        
+                        hasSelection: function() {
+                            return !!this.currentElement;
+                        }
+                    };
+                    
+                    console.log('🎯 Sistema de selección persistente inicializado');
+                }, 1000);
             }, 500);
         });
     </script>

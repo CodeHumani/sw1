@@ -80,6 +80,61 @@ class AIController {
 
             console.log('🤖 AI Request:', { type, salaId, hasContent: !!content });
 
+            // Check if OpenAI is configured
+            if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
+                // Return a demo diagram
+                const demoDiagram = {
+                    elements: [
+                        {
+                            id: "class1",
+                            type: "class",
+                            name: "Usuario",
+                            attributes: [
+                                { name: "id", type: "int", visibility: "private", isPrimaryKey: true },
+                                { name: "nombre", type: "string", visibility: "private", isPrimaryKey: false },
+                                { name: "email", type: "string", visibility: "private", isPrimaryKey: false }
+                            ],
+                            methods: [
+                                { name: "getNombre", returnType: "string", parameters: [], visibility: "public" },
+                                { name: "setNombre", returnType: "void", parameters: [{ name: "nombre", type: "string" }], visibility: "public" }
+                            ],
+                            position: { x: 100, y: 100 }
+                        },
+                        {
+                            id: "class2", 
+                            type: "class",
+                            name: "Proyecto",
+                            attributes: [
+                                { name: "id", type: "int", visibility: "private", isPrimaryKey: true },
+                                { name: "titulo", type: "string", visibility: "private", isPrimaryKey: false },
+                                { name: "fechaCreacion", type: "Date", visibility: "private", isPrimaryKey: false }
+                            ],
+                            methods: [
+                                { name: "getTitulo", returnType: "string", parameters: [], visibility: "public" },
+                                { name: "setTitulo", returnType: "void", parameters: [{ name: "titulo", type: "string" }], visibility: "public" }
+                            ],
+                            position: { x: 400, y: 100 }
+                        }
+                    ],
+                    relationships: [
+                        {
+                            id: "rel1",
+                            type: "association",
+                            sourceId: "class1",
+                            targetId: "class2",
+                            cardinality: "1:*"
+                        }
+                    ]
+                };
+
+                return res.json({
+                    success: true,
+                    message: '⚠️ Demo: Configura tu clave de OpenAI para usar IA real. Diagrama de ejemplo generado.',
+                    diagram: demoDiagram,
+                    originalInput: content || 'Demo input'
+                });
+            }
+
             switch (type) {
                 case 'text':
                     userInput = content;
