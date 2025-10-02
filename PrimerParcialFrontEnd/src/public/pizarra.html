@@ -1685,6 +1685,7 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="js/config.js"></script>
 
     <script>
         class UMLElement {
@@ -2897,20 +2898,14 @@
                     // Mostrar mensaje de carga
                     this.showValidationMessage('🔄 Generando proyecto Spring Boot...', 'info');
                     
-                    const response = await fetch(`http://localhost:8083/apis/crearPagina/exportarSpringBoot/${salaId}`, {
+                    const response = await fetch(`${API_URL}/apis/crearPagina/exportarSpringBoot/${salaId}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                        }
+                        },
+                        credentials: 'include'
                         // ✅ NO ENVIAMOS BODY - El backend usa el XML de la sala directamente
                     });
-
-                    console.log('📡 Respuesta del servidor:', {
-                        status: response.status,
-                        statusText: response.statusText,
-                        headers: Object.fromEntries(response.headers.entries())
-                    });
-
                     if (response.ok) {
                         const blob = await response.blob();
                         const url = URL.createObjectURL(blob);
@@ -2919,13 +2914,9 @@
                         downloadLink.download = `spring-boot-sala-${salaId}.zip`;
                         downloadLink.click();
                         URL.revokeObjectURL(url);
-                        console.log('✅ Proyecto Spring Boot generado exitosamente desde XML de sala');
-                        
-                        // Mostrar mensaje de éxito
                         this.showValidationMessage('🚀 Spring Boot generado correctamente desde la sala', 'success');
                     } else {
                         let errorMessage = `Error ${response.status}: ${response.statusText}`;
-                        
                         try {
                             const errorData = await response.json();
                             console.error('❌ Error del servidor:', errorData);
@@ -2947,29 +2938,21 @@
                 }
             }
 
-            // ⚠️ MÉTODO ANTERIOR (mantener para referencia, pero ya no se usa)
             static async exportSpringBootAnterior() {
                 try {
-                    console.log('⚠️ MÉTODO ANTERIOR: Usando datos del frontend (puede inventar relaciones)');
-                    
-                    // Normalizar elementos antes de enviar
                     const normalizedData = this.normalizeForSpringBootDirect();
-                    
                     if (normalizedData.elements.length === 0) {
                         alert('No hay elementos UML para exportar');
                         return;
                     }
-                    
-                    console.log('Datos normalizados para Spring Boot:', normalizedData);
-                    
-                    const response = await fetch('http://localhost:8083/apis/crearPagina/exportarSpringBoot', {
+                    const response = await fetch(`${API_URL}/apis/crearPagina/exportarSpringBoot`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
+                        credentials: 'include',
                         body: JSON.stringify(normalizedData)
                     });
-
                     if (response.ok) {
                         const blob = await response.blob();
                         const url = URL.createObjectURL(blob);
@@ -2978,7 +2961,6 @@
                         downloadLink.download = 'spring-boot-project.zip';
                         downloadLink.click();
                         URL.revokeObjectURL(url);
-                        console.log('Proyecto Spring Boot generado exitosamente');
                     } else {
                         const errorData = await response.json();
                         alert(`Error al generar proyecto Spring Boot: ${errorData.message}`);
@@ -2992,29 +2974,15 @@
             static normalizeForSpringBootDirect() {
                 try {
                     console.log('🚀 Iniciando normalización para Spring Boot...');
-                    
                     const elements = Array.from(this.elements.values()).map(el => ({ ...el, selected: false }));
-                    console.log('📊 Elementos encontrados:', elements.length);
-                    
-                    // 🔍 DEBUG: Verificar conexiones paso a paso
-                    console.log('🔍 DEBUG ConnectionManager disponible:', typeof ConnectionManager !== 'undefined');
-                    console.log('🔍 DEBUG ConnectionManager.connections existe:', 
-                        typeof ConnectionManager !== 'undefined' && ConnectionManager.connections);
-                    
                     let rawConnections = [];
                     if (typeof ConnectionManager !== 'undefined' && ConnectionManager.connections) {
                         rawConnections = ConnectionManager.connections;
-                        console.log('🔗 Conexiones raw del ConnectionManager:', rawConnections.length);
                         rawConnections.forEach((conn, i) => {
                             console.log(`  ${i + 1}. RAW:`, JSON.stringify(conn, null, 2));
                         });
-                    } else {
-                        console.log('❌ ConnectionManager no disponible o sin conexiones');
                     }
-                    
-                    // ✅ CREAR CONEXIONES DE PRUEBA SI NO HAY NINGUNA
                     if (rawConnections.length === 0 && elements.length >= 2) {
-                        console.log('🧪 Creando conexiones de prueba...');
                         rawConnections = [{
                             id: 'test_conn_1',
                             source: elements[0].id,
@@ -3024,10 +2992,7 @@
                             targetMultiplicity: 'N',
                             label: 'Test Relationship'
                         }];
-                        console.log('✅ Conexión de prueba creada:', rawConnections[0]);
                     }
-                    
-                    // ✅ NORMALIZAR CONEXIONES: Convertir a formato esperado por backend
                     const connections = rawConnections.map(conn => {
                         const normalized = {
                             id: conn.id || `conn_${Date.now()}`,
@@ -3041,23 +3006,13 @@
                             sourceMultiplicity: conn.sourceMultiplicity,
                             targetMultiplicity: conn.targetMultiplicity
                         };
-                        
-                        console.log('✅ Conexión normalizada:', normalized);
                         return normalized;
                     });
-                    
-                    console.log(`🔗 Total conexiones normalizadas: ${connections.length}`);
-                    
-                    // Crear copia profunda para no modificar los originales
                     const normalizedElements = JSON.parse(JSON.stringify(elements));
                     
-                    // Paso 1: Asegurar que cada clase tenga una llave primaria
                     normalizedElements.forEach(element => {
                         if (element.type === 'class') {
-                            console.log(`🏗️ Procesando clase: ${element.name}`);
-                            // Agregar llave primaria si no existe
                             if (!element.attributes) element.attributes = [];
-                            
                             const hasPrimaryKey = element.attributes.some(attr => {
                                 if (typeof attr === 'object' && attr !== null) {
                                     return attr.isPrimaryKey === true;
@@ -3066,18 +3021,12 @@
                                 }
                                 return false;
                             });
-                            
-                            // ✅ Verificar si el usuario quiere PKs compuestas
                             const primaryKeyCount = element.attributes.filter(attr => 
                                 typeof attr === 'object' && attr.isPrimaryKey === true
                             ).length;
-                            
                             if (primaryKeyCount > 1) {
-                                // Usuario tiene múltiples PKs - permitir PK compuesta
                                 element.allowCompositePK = true;
-                                console.log(`🔑 PK compuesta detectada para ${element.name}: ${primaryKeyCount} claves`);
                             } else if (!hasPrimaryKey) {
-                                // No tiene PK - generar una por defecto
                                 const defaultPK = {
                                     name: 'id',
                                     type: 'Long',
@@ -3090,16 +3039,11 @@
                                 };
                                 element.attributes.unshift(defaultPK);
                                 element.allowCompositePK = false;
-                                console.log(`🔑 PK generada automáticamente para ${element.name}: Long id`);
                             } else {
-                                // Tiene una sola PK - marcar como simple
                                 element.allowCompositePK = false;
-                                console.log(`🔑 PK simple detectada para ${element.name}`);
                             }
                         }
                     });
-                    
-                    // Paso 2: Procesar relaciones y generar llaves foráneas
                     if (connections.length > 0) {
                         console.log('🔄 Procesando relaciones...');
                         this.processRelationshipsForSpringBoot(normalizedElements, connections);
@@ -8801,21 +8745,25 @@
                     ConnectionManager.connections = [];
                     DiagramManager.setStorageKey(`sala-${salaId}`);
                     this.showLoadingIndicator(true, 'Cargando sala...');
-                    let apiBaseUrl = 'http://localhost:8083';
+                    let apiBaseUrl = API_URL;
                     let response;
                     try {
                         const url = `${apiBaseUrl}/apis/sala/${salaId}`;
                         console.log(`📡 Intentando cargar desde: ${url}`);
-                        response = await fetch(url);
+                        response = await fetch(url, {
+                            credentials: 'include'
+                        });
                         console.log(`📨 Respuesta recibida - Status: ${response.status}`);
                     } catch (fetchError) {
                         console.warn(`⚠️ Error con URL ${apiBaseUrl}: ${fetchError.message}`);
                         console.log('🔄 Intentando con URL alternativa...');
-                        apiBaseUrl = 'http://localhost:8083';
+                        apiBaseUrl = API_URL;
                         try {
                             const altUrl = `${apiBaseUrl}/apis/sala/${salaId}`;
                             console.log(`📡 Intentando cargar desde URL alternativa: ${altUrl}`);
-                            response = await fetch(altUrl);
+                            response = await fetch(altUrl, {
+                                credentials: 'include'
+                            });
                             console.log(`📨 Respuesta alternativa - Status: ${response.status}`);
                         } catch (altFetchError) {
                             throw new Error(`No se pudo conectar con el servidor: ${altFetchError.message}`);
@@ -9425,13 +9373,14 @@
                     console.log(`📏 Tamaño de los datos a guardar: ${xmlData.length} bytes`);
                     
                     // Hacer la petición al servidor
-                    const url = `http://localhost:8083/apis/sala/${salaId}`;
+                    const url = `${API_URL}/apis/sala/${salaId}`;
                     console.log(`📡 Enviando datos a: ${url}`);
                     const response = await fetch(url, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
                         },
+                        credentials: 'include',
                         body: JSON.stringify({
                             xml: xmlData
                         })
@@ -9457,7 +9406,7 @@
                     this.showSaveStatus(true);
                 } catch (error) {
                     console.error('❌ Error guardando diagrama:', error);
-                    console.error('📄 URL que falló:', `http://localhost:8083/apis/sala/${salaId}`);
+                    console.error('📄 URL que falló:', `${API_URL}/apis/sala/${salaId}`);
                     this.showSaveStatus(false, error.message);
                 }
             }
@@ -9844,11 +9793,12 @@
                         console.log('🔑 Token encontrado, verificando con el servidor...');
                         
                         // Intentar obtener información del usuario del backend
-                        const response = await fetch('http://localhost:8083/apis/auth/verify', {
+                        const response = await fetch(`${API_URL}/apis/auth/verify`, {
                             headers: {
                                 'Authorization': `Bearer ${token}`,
                                 'Content-Type': 'application/json'
-                            }
+                            },
+                            credentials: 'include'
                         });
                         
                         if (response.ok) {
@@ -9900,7 +9850,9 @@
                 try {
                     console.log(`🔍 Verificando si usuario ${userId} es invitado a sala ${this.salaId}...`);
                     
-                    const response = await fetch(`http://localhost:8083/apis/usersala/user/${userId}/salas`);
+                    const response = await fetch(`${API_URL}/apis/usersala/user/${userId}/salas`, {
+                        credentials: 'include'
+                    });
                     if (response.ok) {
                         const userSalas = await response.json();
                         this.isUserInvited = userSalas.some(sala => sala.id == this.salaId);
@@ -9919,7 +9871,9 @@
                 try {
                     console.log(`🔍 Verificando usuarios invitados en sala ${this.salaId}...`);
                     
-                    const response = await fetch(`http://localhost:8083/apis/usersala/sala/${this.salaId}`);
+                    const response = await fetch(`${API_URL}/apis/usersala/sala/${this.salaId}`, {
+                        credentials: 'include'
+                    });
                     if (response.ok) {
                         const usersInRoom = await response.json();
                         console.log('👥 Usuarios en la sala:', usersInRoom);
@@ -9951,7 +9905,7 @@
             
             initSocket() {
                 // Conectar al servidor Socket.IO con configuración más robusta
-                this.socket = io('http://localhost:8083', {
+                this.socket = io(API_URL, {
                     transports: ['websocket', 'polling'],
                     forceNew: true,
                     reconnection: true,
@@ -11184,11 +11138,12 @@
 
                 try {
                     // Send to backend
-                    const response = await fetch('http://localhost:8083/apis/ai/generate-diagram', {
+                    const response = await fetch(`${API_URL}/apis/ai/generate-diagram`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
+                        credentials: 'include',
                         body: JSON.stringify({
                             type: 'text',
                             content: message,
@@ -11276,8 +11231,9 @@
                     formData.append('audio', audioBlob, 'recording.wav');
                     formData.append('salaId', this.salaId);
 
-                    const response = await fetch('http://localhost:8083/apis/ai/generate-diagram', {
+                    const response = await fetch(`${API_URL}/apis/ai/generate-diagram`, {
                         method: 'POST',
+                        credentials: 'include',
                         body: formData
                     });
 
@@ -11321,7 +11277,7 @@
                     const formData = new FormData();
                     formData.append('image', imageFile);
                     formData.append('salaId', this.salaId);
-                    const response = await fetch('http://localhost:8083/apis/ai/generate-diagram', {
+                    const response = await fetch(`${API_URL}/apis/ai/generate-diagram`, {
                         method: 'POST',
                         credentials: 'include',
                         body: formData

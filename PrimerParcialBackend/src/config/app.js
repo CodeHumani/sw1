@@ -7,6 +7,7 @@ import salaRoutes from '../routes/sala.routes.js';
 import usersalaRoutes from '../routes/usersala.routes.js';
 import crearPaginaRoutes from '../routes/crearPagina.routes.js';
 import aiRoutes from '../routes/ai.routes.js';
+import { FRONTEND_URL } from '../config.js';
 
 const app = express();
 
@@ -15,7 +16,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(cors({
-    origin: 'http://localhost:5000',
+    origin: FRONTEND_URL,
     credentials: true
 }));
 

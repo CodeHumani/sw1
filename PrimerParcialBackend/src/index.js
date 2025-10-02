@@ -5,6 +5,7 @@ import { Server as SocketIOServer } from 'socket.io';
 import http from 'http';
 import errorHandler from './middlewares/catchedAsync.js';
 import { updateSala, getSalaById } from './models/sala.model.js';
+import { FRONTEND_URL } from './config.js';
 
 pool.connect()
     .then(() => console.log("✅ Conectado exitosamente a la base de datos"))
@@ -13,7 +14,7 @@ pool.connect()
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
     cors: {
-        origin: 'http://localhost:5000',
+        origin: FRONTEND_URL,
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: true
     }
@@ -64,8 +65,6 @@ io.on('connection', (socket) => {
                 const salaData = await getSalaById(salaIdNormalizado);
                 if (salaData && salaData.length > 0 && salaData[0].xml) {
                     const estadoInicial = JSON.parse(salaData[0].xml);
-                    
-                    // 🚀 ENVIAR TANTO estadoInicial COMO xmlActualizado para máxima compatibilidad
                     socket.emit('estadoInicial', { state: estadoInicial });
                     
                     socket.emit('xmlActualizado', {
@@ -76,9 +75,7 @@ io.on('connection', (socket) => {
                     });
                     
                     sala.ultimoEstado = estadoInicial;
-                    console.log(`✅ Socket: Estado cargado y sincronizado para sala ${salaIdNormalizado}`);
                 } else {
-                    console.log(`⚠️ Socket: No se encontró estado para sala ${salaIdNormalizado}`);
                     socket.emit('estadoInicial', { state: null });
                 }
             } catch (error) {
@@ -87,7 +84,6 @@ io.on('connection', (socket) => {
             }
             const usuariosConectados = Array.from(sala.usuarios.values());
             socket.emit('usuariosConectados', { usuarios: usuariosConectados });
-            
             usuariosConectados.forEach(u => {
                 console.log(`      - ${u.name} (${u.isInvited ? 'INVITADO/USERSALA' : 'PROPIETARIO'})`);
             });
@@ -190,7 +186,6 @@ io.on('connection', (socket) => {
 
     socket.on('guardarEstado', async ({ salaId, estado }) => {
         try {
-            console.log(`💾 Socket: Guardando estado de sala ${salaId} en base de datos`);
             const estadoJson = JSON.stringify(estado);
             await updateSala(salaId, undefined, estadoJson, undefined, io);
             const sala = salasActivas.get(salaId);
@@ -198,7 +193,6 @@ io.on('connection', (socket) => {
                 sala.ultimoEstado = estado;
             }
             socket.emit('estadoGuardado', { success: true });
-            console.log(`✅ Socket: Estado guardado exitosamente para sala ${salaId}`);
         } catch (error) {
             console.error(`❌ Socket: Error guardando estado para sala ${salaId}:`, error);
             socket.emit('errorSincronizacion', { message: 'Error al guardar en la base de datos' });
@@ -255,9 +249,7 @@ app.use((req, res, next) => {
 });
 app.use(errorHandler);
 
-const PORT = 8083;
+const PORT = process.env.PORT || 8083;
 server.listen(PORT, () => {
     console.log(`🚀 Servidor Express + Socket.IO corriendo en puerto ${PORT}`);
-    console.log(`🔄 Sistema de colaboración en tiempo real activado`);
-    console.log(`💾 Auto-guardado configurado cada 30 segundos`);
 });

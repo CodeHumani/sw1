@@ -7,7 +7,6 @@ class AuthController {
 
     register = catchedAsync(async (req, res) => {
         const { name, email, password } = req.body;
-        
         try {
             const user = await createUser(name, email, password);
             
@@ -26,19 +25,16 @@ class AuthController {
                     message: 'Error interno: Usuario creado pero no encontrado' 
                 });
             }
-            
             const token = await createAccesToken({ id: userALter.id });
             res.cookie('token', token, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'Strict'
+                secure: true,
+                sameSite: 'None'
             });
-            
             response(res, 200, { 
                 token, 
                 user: { id: userALter.id, name: userALter.name, email: userALter.email } 
             });
-            
         } catch (error) {
             console.error('Error en registro:', error);
             return response(res, 500, { 
@@ -51,8 +47,6 @@ class AuthController {
     login = catchedAsync(async (req, res) => {
         const { email, password } = req.body;
         const user = await verifyUserCredentials(email, password);
-        
-        // Verificar si el usuario existe y las credenciales son válidas
         if (!user) {
             return response(res, 401, { 
                 error: true, 
@@ -63,8 +57,8 @@ class AuthController {
         const token = await createAccesToken({ id: user.id });
         res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'Strict'
+            secure: true,
+            sameSite: 'None'
         });
         response(res, 200, token );
     });
@@ -73,8 +67,8 @@ class AuthController {
         res.cookie('token', '', {
             expires: new Date(0),
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'Strict'
+            secure: true,
+            sameSite: 'None'
         });
         response(res, 200, { msg: 'Logout successful' });
     });
@@ -96,8 +90,8 @@ class AuthController {
         res.cookie('token', '', {
             expires: new Date(0),
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'Strict'
+            secure: true,
+            sameSite: 'None'
         });
         response(res, 200, user);
     });
