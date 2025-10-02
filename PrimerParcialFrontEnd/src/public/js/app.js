@@ -1,17 +1,26 @@
 let t = 0;
 let canvas = document.querySelector('canvas');
-let plano2D = canvas.getContext('2d');
+let plano2D = null;
+
+// Solo inicializar canvas si existe en la página
+if (canvas) {
+    plano2D = canvas.getContext('2d');
+}
 
 let video = document.querySelector('#video');
 
 function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    if (canvas) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
 }
 
 resizeCanvas();
 
 function draw() {
+    if (!plano2D || !canvas) return; // Salir si no hay canvas
+    
     plano2D.fillStyle = 'hsla(0,0%,0%,.1)';
     plano2D.fillRect(0, 0, canvas.width, canvas.height);
     let f, r;

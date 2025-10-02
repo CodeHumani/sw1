@@ -1686,6 +1686,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="js/config.js"></script>
+    <script src="js/auth-utils.js"></script>
 
     <script>
         class UMLElement {
@@ -9850,9 +9851,7 @@
                 try {
                     console.log(`🔍 Verificando si usuario ${userId} es invitado a sala ${this.salaId}...`);
                     
-                    const response = await fetch(`${API_URL}/apis/usersala/user/${userId}/salas`, {
-                        credentials: 'include'
-                    });
+                    const response = await authUtils.authenticatedFetch(`${API_URL}/apis/usersala/user/${userId}/salas`);
                     if (response.ok) {
                         const userSalas = await response.json();
                         this.isUserInvited = userSalas.some(sala => sala.id == this.salaId);

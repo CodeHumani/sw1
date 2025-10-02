@@ -5,7 +5,7 @@ import { Server as SocketIOServer } from 'socket.io';
 import http from 'http';
 import errorHandler from './middlewares/catchedAsync.js';
 import { updateSala, getSalaById } from './models/sala.model.js';
-import { FRONTEND_URL } from './config.js';
+import { FRONTEND_URLS } from './config.js';
 
 pool.connect()
     .then(() => console.log("✅ Conectado exitosamente a la base de datos"))
@@ -14,7 +14,7 @@ pool.connect()
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
     cors: {
-        origin: FRONTEND_URL,
+        origin: FRONTEND_URLS,
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: true
     }

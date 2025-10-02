@@ -15,6 +15,13 @@ document.getElementById('login-form').addEventListener('submit', async function 
         });
 
         if (response.ok) {
+            const data = await response.json();
+            console.log('✅ Login exitoso:', data);
+            if (data.token) {
+                localStorage.setItem('authToken', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                console.log('🔑 Token guardado en localStorage');
+            }
             alert('Login exitoso');
             window.location.href = './dashboard.html'; 
         } else {

@@ -9,12 +9,8 @@ document.getElementById('create-room-form').addEventListener('submit', async fun
         description: description
     };
     try {
-        const response = await fetch(`${API_URL}/apis/sala/`, {
+        const response = await authUtils.authenticatedFetch(`${API_URL}/apis/sala/`, {
             method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify(roomData)
         });
         if (response.ok) {

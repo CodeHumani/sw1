@@ -9,16 +9,13 @@ class AuthController {
         const { name, email, password } = req.body;
         try {
             const user = await createUser(name, email, password);
-            
             if (!user) {
                 return response(res, 400, { 
                     error: true, 
                     message: 'No se pudo crear el usuario. Posiblemente el email ya existe.' 
                 });
             }
-            
             const userALter = await getUserByEmail(email);
-            
             if (!userALter) {
                 return response(res, 500, { 
                     error: true, 
@@ -33,7 +30,8 @@ class AuthController {
             });
             response(res, 200, { 
                 token, 
-                user: { id: userALter.id, name: userALter.name, email: userALter.email } 
+                user: { id: userALter.id, name: userALter.name, email: userALter.email },
+                message: 'Registration successful'
             });
         } catch (error) {
             console.error('Error en registro:', error);
@@ -53,14 +51,17 @@ class AuthController {
                 message: 'Credenciales inválidas' 
             });
         }
-        
         const token = await createAccesToken({ id: user.id });
         res.cookie('token', token, {
             httpOnly: true,
             secure: true,
             sameSite: 'None'
         });
-        response(res, 200, token );
+        response(res, 200, { 
+            token,
+            user: { id: user.id, name: user.name, email: user.email },
+            message: 'Login successful'
+        });
     });
 
     logout = catchedAsync(async (req, res) => {
@@ -74,7 +75,6 @@ class AuthController {
     });
 
     profile = catchedAsync(async (req, res) => {
-        console.log('Request to profile endpoint:', req.user.id);
         const user = await getUserById(req.user.id);
         response(res, 200, user);
     });

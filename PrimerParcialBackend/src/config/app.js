@@ -7,7 +7,7 @@ import salaRoutes from '../routes/sala.routes.js';
 import usersalaRoutes from '../routes/usersala.routes.js';
 import crearPaginaRoutes from '../routes/crearPagina.routes.js';
 import aiRoutes from '../routes/ai.routes.js';
-import { FRONTEND_URL } from '../config.js';
+import { FRONTEND_URLS } from '../config.js';
 
 const app = express();
 
@@ -16,7 +16,14 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(cors({
-    origin: FRONTEND_URL,
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        if (FRONTEND_URLS.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true
 }));
 

@@ -41,6 +41,7 @@
     </main>    
     <video id="video" src="/video.mp4" style="display:none;" controls></video>
     <script src="./js/config.js"></script> 
+    <script src="./js/auth-utils.js"></script>
 
     <script>
         function getQueryParam(param) {
@@ -51,12 +52,8 @@
             const roomId = getQueryParam('id');
             if (roomId) {
                 try {
-                    const response = await fetch(`${API_URL}/apis/sala/${roomId}`, {
-                        method: 'GET',
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        }
+                    const response = await authUtils.authenticatedFetch(`${API_URL}/apis/sala/${roomId}`, {
+                        method: 'GET'
                     });
                     const data = await response.json();
                     if (data.error === false && data.data.length > 0) {
@@ -83,12 +80,8 @@
             const xml = document.getElementById('xml').value;
             const description = document.getElementById('description').value;
             try {
-                const response = await fetch(`${API_URL}/apis/sala/${id}`, {
+                const response = await authUtils.authenticatedFetch(`${API_URL}/apis/sala/${id}`, {
                     method: 'PUT',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
                     body: JSON.stringify({
                         title: title,
                         xml: xml,

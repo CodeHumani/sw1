@@ -1,19 +1,23 @@
 document.getElementById('logout-button').addEventListener('click', async function () { 
     try {
-        const response = await fetch(`${API_URL}/apis/logout`, {
-            method: 'POST',
-            credentials: 'include'
+        const response = await authUtils.authenticatedFetch(`${API_URL}/apis/logout`, {
+            method: 'POST'
         });
-
-        if (response.ok) {
+        if (response && response.ok) {
+            // 🔑 Limpiar token almacenado
+            authUtils.clearToken();
             alert('Logout exitoso');
             window.location.href = './login.html';
         } else {
-            const errorData = await response.json();
+            const errorData = response ? await response.json() : { message: 'Error desconocido' };
             alert(`Error en el logout: ${errorData.message}`);
         }
     } catch (error) {
         console.error('Error en la solicitud:', error);
+        // En caso de error, limpiar de todas formas
+        authUtils.clearToken();
+        alert('Sesión cerrada localmente');
+        window.location.href = './login.html';
     }
 });
 
@@ -23,12 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function fetchUserInfo() {
-    fetch(`${API_URL}/apis/`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+    authUtils.authenticatedFetch(`${API_URL}/apis/`, {
+        method: 'GET'
     })
     .then(handleResponse)
     .then(data => {
@@ -50,18 +50,13 @@ function fetchUserInfo() {
 }
 
 function fetchRooms() {
-    fetch(`${API_URL}/apis/sala`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+    authUtils.authenticatedFetch(`${API_URL}/apis/sala`, {
+        method: 'GET'
     })
     .then(handleResponse)
     .then(data => {
         const roomsBody = document.getElementById('rooms-body');
         roomsBody.innerHTML = '';
-    
         if (!data.error && data.data.length > 0) {
             data.data.forEach(room => {
                 const row = createRoomRow(room);
@@ -83,26 +78,19 @@ document.getElementById('view-shared-rooms-button').addEventListener('click', ()
 });
 
 function fetchSharedRooms() {
-    fetch(`${API_URL}/apis/userSala/`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+    authUtils.authenticatedFetch(`${API_URL}/apis/userSala/`, {
+        method: 'GET'
     })
     .then(handleResponse)
     .then(data => {
         const roomsBody = document.getElementById('rooms-body');
         roomsBody.innerHTML = '';
-
         if (!data.error && data.data.length > 0) {
             data.data.forEach(room => {
                 const id = encodeURIComponent(room.id);
                 const title = encodeURIComponent(room.title || '');
                 const description = encodeURIComponent(room.description || '');
-
                 const url = `pizarra.html?id=${id}&title=${title}&description=${description}`;
-
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><a href="${url}" style="color: white; font-size: 18px;">${room.id}</a></td>
