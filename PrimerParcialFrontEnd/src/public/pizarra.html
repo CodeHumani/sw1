@@ -43,6 +43,58 @@
             background: linear-gradient(135deg, var(--primary-color), #3b82f6);
             color: white;
             font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tools-title {
+            display: flex;
+            align-items: center;
+        }
+
+        .tools-toggle-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tools-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .tools-panel.collapsed {
+            width: 60px;
+            transition: width 0.3s ease;
+        }
+
+        .tools-panel.collapsed .tool-section {
+            display: none;
+        }
+
+        .tools-panel.collapsed .tools-title {
+            display: none;
+        }
+
+        .tools-panel.collapsed .tools-toggle-btn {
+            margin: 0 auto;
+        }
+
+        .tools-toggle-btn i {
+            transition: transform 0.3s ease;
+        }
+
+        .tools-panel.collapsed .tools-toggle-btn i {
+            transform: rotate(180deg);
         }
 
         .tool-section {
@@ -433,6 +485,58 @@
             background: linear-gradient(135deg, var(--success-color), #10b981);
             color: white;
             font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .properties-title {
+            display: flex;
+            align-items: center;
+        }
+
+        .properties-toggle-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .properties-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .properties-panel.collapsed {
+            width: 60px;
+            transition: width 0.3s ease;
+        }
+
+        .properties-panel.collapsed #properties-content {
+            display: none;
+        }
+
+        .properties-panel.collapsed .properties-title {
+            display: none;
+        }
+
+        .properties-panel.collapsed .properties-toggle-btn {
+            margin: 0 auto;
+        }
+
+        .properties-toggle-btn i {
+            transition: transform 0.3s ease;
+        }
+
+        .properties-panel.collapsed .properties-toggle-btn i {
+            transform: rotate(180deg);
         }
 
         .property-group {
@@ -1494,10 +1598,15 @@
 </head>
 <body>
     <div class="main-container">
-        <div class="tools-panel">
+        <div class="tools-panel" id="tools-panel">
             <div class="tools-header">
-                <i class="fas fa-tools me-2"></i>
-                Herramientas
+                <div class="tools-title">
+                    <i class="fas fa-tools me-2"></i>
+                    Herramientas
+                </div>
+                <button class="tools-toggle-btn" id="tools-toggle-btn" onclick="ToolsManager.togglePanel()" title="Ocultar/Mostrar Panel">
+                    <i class="fas fa-chevron-left" id="tools-toggle-icon"></i>
+                </button>
             </div>
             <div class="tool-section">
                 <h6 class="text-muted mb-3">Elementos UML</h6>
@@ -1601,10 +1710,15 @@
             </div>
         </div>
         <!-- Panel de Propiedades -->
-        <div class="properties-panel">
+        <div class="properties-panel" id="properties-panel">
             <div class="properties-header">
-                <i class="fas fa-cog me-2"></i>
-                Propiedades
+                <div class="properties-title">
+                    <i class="fas fa-cog me-2"></i>
+                    Propiedades
+                </div>
+                <button class="properties-toggle-btn" id="properties-toggle-btn" onclick="PropertiesManager.togglePanel()" title="Ocultar/Mostrar Panel">
+                    <i class="fas fa-chevron-right" id="properties-toggle-icon"></i>
+                </button>
             </div>
             <div id="properties-content">
                 <div class="text-center text-muted p-4">
@@ -4389,6 +4503,33 @@
                     </div>
                 `;
                 console.log('✅ PropertiesManager.showEmpty() ejecutado');
+            }
+
+            static togglePanel() {
+                const panel = document.getElementById('properties-panel');
+                const toggleIcon = document.getElementById('properties-toggle-icon');
+                
+                if (panel && toggleIcon) {
+                    panel.classList.toggle('collapsed');
+                    
+                    // Cambiar el ícono según el estado
+                    if (panel.classList.contains('collapsed')) {
+                        toggleIcon.className = 'fas fa-chevron-left';
+                    } else {
+                        toggleIcon.className = 'fas fa-chevron-right';
+                    }
+                    
+                    // Opcional: Guardar el estado en localStorage
+                    localStorage.setItem('propertiesPanelCollapsed', panel.classList.contains('collapsed'));
+                }
+            }
+
+            static initializePanelState() {
+                // Restaurar el estado del panel al cargar la página
+                const isCollapsed = localStorage.getItem('propertiesPanelCollapsed') === 'true';
+                if (isCollapsed) {
+                    this.togglePanel();
+                }
             }
         }
 
@@ -9607,6 +9748,35 @@
             }
         }
 
+        class ToolsManager {
+            static togglePanel() {
+                const panel = document.getElementById('tools-panel');
+                const toggleIcon = document.getElementById('tools-toggle-icon');
+                
+                if (panel && toggleIcon) {
+                    panel.classList.toggle('collapsed');
+                    
+                    // Cambiar el ícono según el estado
+                    if (panel.classList.contains('collapsed')) {
+                        toggleIcon.className = 'fas fa-chevron-right';
+                    } else {
+                        toggleIcon.className = 'fas fa-chevron-left';
+                    }
+                    
+                    // Opcional: Guardar el estado en localStorage
+                    localStorage.setItem('toolsPanelCollapsed', panel.classList.contains('collapsed'));
+                }
+            }
+
+            static initializePanelState() {
+                // Restaurar el estado del panel al cargar la página
+                const isCollapsed = localStorage.getItem('toolsPanelCollapsed') === 'true';
+                if (isCollapsed) {
+                    this.togglePanel();
+                }
+            }
+        }
+
         // ============== INTEGRACIÓN SIMPLE CON GUARDADO AUTOMÁTICO ==============
 
         // Interceptar PersistenceManager para auto-guardar
@@ -11861,6 +12031,16 @@
                 
                 // Initialize AI Chatbot
                 window.aiChatbot = new AIChatbot();
+                
+                // Inicializar estado del panel de propiedades
+                if (typeof PropertiesManager !== 'undefined') {
+                    PropertiesManager.initializePanelState();
+                }
+                
+                // Inicializar estado del panel de herramientas
+                if (typeof ToolsManager !== 'undefined') {
+                    ToolsManager.initializePanelState();
+                }
                 
                     // 🛡️ PROTECCIÓN GLOBAL: Watcher para el panel de propiedades
                 setTimeout(() => {
